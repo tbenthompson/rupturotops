@@ -42,7 +42,7 @@ class TestSolutions(unittest.TestCase):
         slip = 1.0
         depth_of_fault = 15.
         H = 15.
-        x = np.arange(-100.01,100.01)
+        x = np.arange(-100.01, 100.01)
         t_over_t_r = np.arange(0.0, 5.0)
         u = map(lambda t: segall_maxwell.calc_disp(x, t, depth_of_fault, H, slip), t_over_t_r)
 
@@ -52,9 +52,20 @@ class TestSolutions(unittest.TestCase):
         self.assertTrue(utilities.mse(u[0], time0analyticsolution) < 0.01) 
         return u, x, H
 
+    def testCompareFullWithSegallMaxwellDimensionless(self):
+        slip_distribution = lambda z: 1
+        x = np.arange(-10.0, 10.0, 0.2)
+        t = np.arange(0.0, 5.0)
+        alpha = 1
+        beta =  
+
     def testAIntegral(self):
         a = utilities.A_integral(lambda z: 1, 1, 1, 0)
+        #arctan(1) - arctan(0) = pi/4..... arctan(0) = 0
         self.assertTrue(abs(a - (pi/4)) < 0.0001)
+
+        b = utilities.A_integral(lambda z: 2, 1, 1, 0)
+        self.assertTrue(abs(b - (pi/2)) < 0.0001)
 
     #compare the solution with variation in elastic modulus with the other solutions
     def testCompareVariableModuliSolution(self):

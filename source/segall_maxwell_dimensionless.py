@@ -7,7 +7,7 @@ from utilities import dimensionless_arctan
 
 def constant_slip_constant_shear_modulus_viscoelastic(x, t, alpha, a):
     def E(n):
-        retval = 0
+        retval = 0l
         for m in range(1, n+1):
             retval += ((-a * t)**(n-m))/factorial(n-m)
         return retval

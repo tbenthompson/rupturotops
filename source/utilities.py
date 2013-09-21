@@ -10,7 +10,7 @@ def dimensionless_arctan(x, alpha, C):
     # print retval
     return retval
 
-def A_integral(slip_distribution, alpha, x, C):
+def A_integral(slip_distribution, x, alpha, C):
     def integrand(z):
         denom = ((alpha * x) ** 2 + ((z / alpha) + C * alpha) ** 2)
         return slip_distribution(z) / denom
