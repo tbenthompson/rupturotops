@@ -1,3 +1,5 @@
+import numpy as np
+from math import pi
 import unittest
 
 import fully_elastic_solns 
@@ -15,32 +17,49 @@ class TestSolutions(unittest.TestCase):
         for i in range(len(x)):
             displacement.append(fully_elastic_solns.elastic_half_space(lambda z: 1.0, x[i]))
             displacement2.append(fully_elastic_solns.two_layer_elastic(lambda z: 1.0, 1.0, 0.0, x[i]))
-        self.assertTrue(mse(displacement,displacement2) < 0.01)
+        self.assertTrue(utilities.mse(displacement,displacement2) < 0.01)
     
     #this compares the dimensional segall solution to my dimensionless solution using my parameters
     def testCompareViscoelasticSolutions(self):
         alpha = 1.0
         a = -1.0
 
-        displacement2, x2 = constantslip.standard_parameters_test(False)
-        # x = np.arange(-(100.0/15.0), (100.0/15.0), (200/(15.0*201)))
-        x = x2/15.0
-        t = np.arange(0,5)
+        u_benchmark, x2, H = self.testCompareSegallViscoelasticSolutionWithSimpleAnalytic()
+        x = x2/H
+        t = np.arange(0.0,5.0)
 
-        displacement = []
+        u_estimate = []
         for i in range(len(t)):
-            displacement.append([])
+            u_estimate.append([])
             for j in range(len(x)):
-                displacement[i].append(constant_slip_constant_shear_modulus_viscoelastic(x[j], t[i], alpha, a))
-        pyp.plot(x, displacement[0], x, displacement[1], x, displacement[2], x, displacement[3])
-        pyp.axis((-(100/15.0),(100/15.0), -1, 1))
-        pyp.xlabel("distance from the fault")
-        pyp.ylabel("displacement")
-        pyp.show()
+                u_estimate[i].append(segall_maxwell_dimensionless.constant_slip_constant_shear_modulus_viscoelastic(x[j], t[i], alpha, a))
+        
+        for i in range(len(t)):
+            self.assertTrue(utilities.mse(u_estimate[i], u_benchmark[i]) < 0.01)
+        # utilities.plot_time_series_1D(x, u_estimate, t)
 
-        print len(displacement2)
-        print np.sqrt((np.sum((displacement[2] - displacement2[2]) ** 2))/len(displacement))
-        print np.sqrt((np.sum((x - (x2/15.0)) ** 2))/len(x))
+    def testCompareSegallViscoelasticSolutionWithSimpleAnalytic(self):
+        slip = 1.0
+        depth_of_fault = 15.
+        H = 15.
+        x = np.arange(-100.01,100.01)
+        t_over_t_r = np.arange(0.0, 5.0)
+        u = map(lambda t: segall_maxwell.calc_disp(x, t, depth_of_fault, H, slip), t_over_t_r)
+
+        #check that this solution devolves to the elastic solution at t = 0
+        #the arctan solution at time t = 0
+        time0analyticsolution = (slip / pi) * np.arctan(depth_of_fault / x)
+        self.assertTrue(utilities.mse(u[0], time0analyticsolution) < 0.01) 
+        return u, x, H
+
+    def testAIntegral(self):
+        a = utilities.A_integral(lambda z: 1, 1, 1, 0)
+        self.assertTrue(abs(a - (pi/4)) < 0.0001)
+
+    #compare the solution with variation in elastic modulus with the other solutions
+    def testCompareVariableModuliSolution(self):
+        pass        
+
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
