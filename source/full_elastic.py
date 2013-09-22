@@ -7,7 +7,9 @@ from utilities import A_integral
 
 #derived by differentiating the slip for slips delta z apart
 def elastic_half_space(slip_distribution, x):
-    return (x/pi) * A_integral(slip_distribution, x, 1, 0)
+    A = A_integral(slip_distribution, x, 1, 0)
+    # print A
+    return (x/pi) * A
 
 #based on the infinite images solution
 def two_layer_elastic(slip_distribution, alpha, beta, x, truncation = 10):

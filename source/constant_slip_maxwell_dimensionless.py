@@ -5,18 +5,19 @@ from matplotlib import pyplot as pyp
 
 from utilities import dimensionless_arctan
 
-def constant_slip_constant_shear_modulus_viscoelastic(x, t, alpha, a):
+#this assumes constant slip and constant shear modulus between two layers, an elastic top layer and a viscoelastic bottom layer
+def solution(x, t, alpha):
     def E(n):
         retval = 0l
         for m in range(1, n+1):
-            retval += ((-a * t)**(n-m))/factorial(n-m)
+            retval += ((t)**(n-m))/factorial(n-m)
         return retval
     result = 0.0
     addthis = 0.0
     n = 1
     while True:
-        addthis = (1 - (np.exp(a * t) * E(n))) * (dimensionless_arctan(x, alpha, 2 * n) + dimensionless_arctan(x, alpha, -2 * n))
-        if (n != 1) and (addthis == 0 or abs(addthis/result) < 0.01):
+        addthis = (1 - (np.exp(-t) * E(n))) * (dimensionless_arctan(x, alpha, 2 * n) + dimensionless_arctan(x, alpha, -2 * n))
+        if (n != 1) and ((addthis == 0).all() or (abs(addthis/result) < 0.01).all()):
             break
         result += addthis
         n += 1

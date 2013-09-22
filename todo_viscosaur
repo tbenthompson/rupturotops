@@ -1,4 +1,5 @@
-figure out some error analysis for the infinite sum in the viscoelastic solution
-derive the constant shear modulus solution from the non-constant shear modulus solution
+coding:
+--run more tests of the code in its limiting cases
+--try some cool slip distributions
 
-
+eventually start on the rate-and-state portion of the model

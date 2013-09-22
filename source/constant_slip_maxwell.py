@@ -18,7 +18,7 @@ def _E(time_scale,n):
         retval += ((time_scale)**(n-j))/factorial(n-j)
     return retval
 
-def calc_disp(x, time_scale, depth_of_fault, H, slip):
+def solution(x, time_scale, depth_of_fault, H, slip):
     u_3 = 0
     for i in range(20):
         u_3 += (1 - (np.exp(-time_scale) * _E(time_scale,i+1))) * _F(x, depth_of_fault, H, i+1)
