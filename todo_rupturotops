@@ -1,0 +1,48 @@
+Current Primary Goal:
+A! give Jim an initial analysis of whether I think the problem is tractable
+--figure out the necessary lower end of 
+
+
+current tasks:
+A! finish reading the nadia lapusta paper
+A! read the details of the discontinuous galerkin paper -- DGCrack
+A! pose the wave equation in the antiplane case in the DG formulation
+
+
+
+http://onlinelibrary.wiley.com/doi/10.1029/2008JB006271/abstract
+A! compile all the relevant literature on discontinuous galerkin methods
+
+https://github.com/carlomr/tspeed
+A! learn about the cohesive zone stuff in the day and lapusta paper 2005
+A! read the jeroen tromp and komatitsch papers on SEM
+A! read about the extended element method
+A! read about the enhanced element method
+A! get my hands on some codes!
+A! talk to jenny about numerical methods
+A! talk to zhigang suo about numerics
+A! read about viscoelastic wave propagation
+A! find the viscoelastic weak form
+
+read:
+http://www.cs.utexas.edu/users/dagh/ch3.html
+https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations
+what are PETSc an Trilinos?
+http://scicomp.stackexchange.com/questions/1176/adaptive-mesh-refinement-with-perfectly-matched-layers
+read about perfectly matched layers
+learn a lot more about adaptive meshing techniques!
+
+the ampuero sem2dpack info pages are useful
+
+eventually:
+
+
+
+A! read about and write a blog post on each major pde discretization
+--FDM
+--FEM
+--FVM
+--Boundary Integral Element Method
+--SEM
+--Discontinuous Galerkin
+--hp FEM
