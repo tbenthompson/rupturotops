@@ -1,28 +1,25 @@
 Current Primary Goal:
 A! give Jim an initial analysis of whether I think the problem is tractable
---figure out the necessary lower end of 
-
+--figure out the necessary lower end of the length scale
 
 current tasks:
-A! finish reading the nadia lapusta paper
-A! read the details of the discontinuous galerkin paper -- DGCrack
 A! pose the wave equation in the antiplane case in the DG formulation
+A! solve the gaussian temperature profile problem with a nonlinear temperature dependent flow law, look at the dependence on time and distance from the fault, is the quick response or the slow response more important
 
-
-
-http://onlinelibrary.wiley.com/doi/10.1029/2008JB006271/abstract
+A! is the ADER-DG local time stepping possible in the DGCrack formulation?
+A! write a page on the differences between DGCrack and ADER-DG
 A! compile all the relevant literature on discontinuous galerkin methods
-
 https://github.com/carlomr/tspeed
 A! learn about the cohesive zone stuff in the day and lapusta paper 2005
-A! read the jeroen tromp and komatitsch papers on SEM
 A! read about the extended element method
-A! read about the enhanced element method
 A! get my hands on some codes!
-A! talk to jenny about numerical methods
-A! talk to zhigang suo about numerics
 A! read about viscoelastic wave propagation
 A! find the viscoelastic weak form
+
+testing the numerics:
+--does it devolve to the elastic case
+--does it devolve to the interseismic viscoelastic case
+--does it devolve to any analytical solutions
 
 read:
 http://www.cs.utexas.edu/users/dagh/ch3.html

@@ -1,6 +1,5 @@
 from math import pi,factorial   
 import numpy as np
-from matplotlib import pyplot as pyp
 
 #displacements
 

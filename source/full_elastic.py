@@ -1,10 +1,9 @@
-from math import pi,factorial   
-import numpy as np
-import scipy.integrate as integrate
-from matplotlib import pyplot as pyp
-
+from math import pi
 from utilities import A_integral
+import numpy as np
 
+np.linspace(1, 2, 0.1)
+np.linalg.
 #derived by differentiating the slip for slips delta z apart
 def elastic_half_space(slip_distribution, x):
     A = A_integral(slip_distribution, x, 1, 0)

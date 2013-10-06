@@ -1,35 +1,39 @@
 import numpy as np
 from math import pi
 import unittest
-import matplotlib.pyplot as pyp
-from pdb import set_trace as _DEBUG
-
-import full_elastic 
-import constant_slip_maxwell_dimensionless 
+import full_elastic
+import constant_slip_maxwell_dimensionless
 import constant_slip_maxwell
 import utilities
 import full_viscoelastic
 
-class CompareSolutions(unittest.TestCase):    
-    #compares the two layers elastic solution to the one layer solution in the case that the moduli are equal -- the degenerate case
+
+class CompareSolutions(unittest.TestCase):
+    # compares the two layers elastic solution to the one layer solution in the
+    # case that the moduli are equal -- the degenerate case
     def testCompareElasticSolutions(self):
         x = np.arange(0.05, 5.0, 0.05)
         displacement = full_elastic.elastic_half_space(lambda z: 1.0, x)
-        displacement2 = full_elastic.two_layer_elastic(lambda z: 1.0, 1.0, 0.0, x)
-        self.assertTrue(utilities.mse(displacement,displacement2) < 0.0001)
-    
-    #this compares the dimensional segall solution to my dimensionless solution using my parameters
+        displacement2 = full_elastic.two_layer_elastic(lambda z: 1.0,
+                                                       1.0, 0.0, x)
+        self.assertTrue(utilities.mse(displacement, displacement2) < 0.0001)
+
+    # this compares the dimensional segall solution to my dimensionless 
+    # solution using my parameters
     def testCompareViscoelasticSolutions(self):
         alpha = 1.0
-        a = -1.0
 
-        u_benchmark, x2, H = self.testCompareSegallViscoelasticSolutionWithSimpleAnalytic()
-        x = x2/H
-        t = np.arange(0.0,5.0)
-        u_estimate = map(lambda t_in: constant_slip_maxwell_dimensionless.solution(x, t_in, alpha), t)
+        u_benchmark, x2, H = self.\
+            testCompareSegallViscoelasticSolutionWithSimpleAnalytic()
+        x = x2 / H
+        t = np.arange(0.0, 5.0)
+        u_estimate = map(lambda t_in:
+                         constant_slip_maxwell_dimensionless.
+                         solution(x, t_in, alpha), t)
 
         for i in range(len(t)):
-            self.assertTrue(utilities.mse(u_estimate[i], u_benchmark[i]) < 0.01)
+            self.assertTrue(utilities.mse(u_estimate[i], u_benchmark[i])
+                            < 0.01)
         # utilities.plot_time_series_1D(x, u_estimate, t)
 
     #check that this solution devolves to the elastic solution at t = 0
