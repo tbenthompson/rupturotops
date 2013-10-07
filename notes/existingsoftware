@@ -3,3 +3,7 @@ GLUMpy for on-the-fly visualization using opengl
 PyClaw for hyperbolic pdes using finite volume method -- implements riemann solvers, so it might be a good source for codes on that
 http://www.hpfem.org/
 http://fenicsproject.org/
+http://www.mcs.anl.gov/petsc/
+http://www3.imperial.ac.uk/earthscienceandengineering/research/amcg/software
+
+maybe use virtualenv to 
