@@ -1,4 +1,5 @@
 import numpy as np
+from math import sqrt, pi, exp
 from matplotlib import pyplot as pyp
 from pdb import set_trace as _DEBUG
 from wetdiabase import wetdiabase
@@ -7,7 +8,8 @@ import scipy.integrate
 
 # boundary conditions are dirichlet and specified as the
 # first and last component of initial_temp
-def run(initial_temp, P, steps, delta_t, delta_x, include_exp=True, plot_every=None):
+def run(initial_temp, P, steps, delta_t, delta_x, 
+        include_exp=True, plot_every=None):
     # _DEBUG()
     X = np.linspace(0, 1, len(initial_temp))
     T = np.tile(initial_temp, (1, steps))
@@ -35,7 +37,8 @@ def run(initial_temp, P, steps, delta_t, delta_x, include_exp=True, plot_every=N
 
 
 def calc_strain(temp, stress, time_scale, deltat, rock_params):
-    tointegrate = rock_params['creepconstant'] * time_scale * stress ** rock_params['stressexponent'] * np.exp(-1 / temp)
+    tointegrate = rock_params['creepconstant'] * time_scale * \
+        stress ** rock_params['stressexponent'] * np.exp(-1 / temp)
     strain = scipy.integrate.cumtrapz(tointegrate, dx=deltat)
     return strain
 
@@ -43,7 +46,8 @@ def calc_strain(temp, stress, time_scale, deltat, rock_params):
 def find_consts(stress, length_scale, rock_params):
     temp_scale = rock_params['activationenergy'] / rock_params['R']
     time_scale = length_scale ** 2 / rock_params['thermaldiffusivity']
-    numer = (time_scale * rock_params['creepconstant'] * stress ** (rock_params['stressexponent'] + 1))
+    numer = (time_scale * rock_params['creepconstant']
+             * stress ** (rock_params['stressexponent'] + 1))
     denom = (temp_scale * rock_params['specificheat'] * rock_params['density'])
     return temp_scale, time_scale, numer / denom
 
@@ -66,25 +70,41 @@ def compare_exp_and_no_exp():
     temp = np.ones((points + 1, 1)) * initialTemp
     temp[points / 2 + 1] = 1200 / temp_scale
 
-    run(temp, P, steps, delta_t, delta_x, include_exp=False, plot_every=plot_steps)
+    run(temp, P, steps, delta_t, delta_x,
+        include_exp=False, plot_every=plot_steps)
     pyp.axis([0, 1, initialTemp, initialTemp * 1.3])
     # pyp.show()
     pyp.figure()
-    run(temp, P, steps, delta_t, delta_x, include_exp=True, plot_every=plot_steps)
+    run(temp, P, steps, delta_t, delta_x,
+        include_exp=True, plot_every=plot_steps)
     pyp.axis([0, 1, initialTemp, initialTemp * 1.3])
     pyp.show()
 
+def gaussian_temp(points, min, max, width):
+    x = (np.linspace(0, 1, points) - 0.5)
+    _DEBUG()
+    temp = max * np.exp(-x ** 2 / width) 
+    temp += min
+    return temp
+
+def test_gaussian_temp():
+    temp = gaussian_temp(5, 0, 1, 1)
+    assert temp[1] < temp[2]
+    assert temp[2] > temp[3]
+    assert temp[3] > temp[4]
+    #distance = 0.5 , distance ** 2 = 0.25
+    assert temp[0] == exp(-0.25)
 
 def total_strain_plot():
     stress = 100e6
-    length_scale = 20
+    length_scale = 0.010
     temp_scale, time_scale, P = find_consts(stress, length_scale, wetdiabase)
 
     #algorithm parameters
-    steps = 50000
+    steps = 5000
     plot_steps = 5000
-    delta_t = 0.00001
     delta_x = 0.05
+    delta_t = delta_x ** 2 / 4.0
     points = 50
 
     #initial conditions and boundary conditions (in the first and last element
