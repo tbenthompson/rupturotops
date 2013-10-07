@@ -1,11 +1,12 @@
 import numpy as np
 from matplotlib import pyplot as pyp
 from pdb import set_trace as _DEBUG
+from wetdiabase import wetdiabase
 
 
 # boundary conditions are dirichlet and specified as the
 # first and last component of initial_temp
-def run(initial_temp, P, steps, delta_t, delta_x, include_exp=True, plot_every=None):
+def run(initial_temp, initial_stress, gamma, beta, steps, delta_t, delta_x, include_exp=True, plot_every=None):
     # _DEBUG()
     X = np.linspace(0, 1, len(initial_temp))
     T = np.tile(initial_temp, (1, steps))
@@ -30,11 +31,23 @@ def run(initial_temp, P, steps, delta_t, delta_x, include_exp=True, plot_every=N
             pyp.plot(X, T[:, which_step])
     return T
 
+#calculates gamma and beta from given real-world parameters
+def determine_constants(input):
+     
+
 
 if __name__ == "__main__":
-    temp = np.ones((201, 1))
-    temp[100] = 2.0
-    P = 0.0001
+    domain_width = 201
+
+    #initial conditions
+    temp = np.ones((domain_width, 1))
+    #double temp at the middle
+    temp[domain_width/2 + 1] = 2.0
+
+    #initial deviatoric stress
+    stress = np.zeros((domain_width, 1))
+    
+
     steps = 500
     delta_t = 1.0
     delta_x = 2.0

@@ -5,6 +5,7 @@ A! give Jim an initial analysis of whether I think the problem is tractable
 current tasks:
 A! pose the wave equation in the antiplane case in the DG formulation
 A! solve the gaussian temperature profile problem with a nonlinear temperature dependent flow law, look at the dependence on time and distance from the fault, is the quick response or the slow response more important
+--look at the segall book for initial stress profiles
 
 A! is the ADER-DG local time stepping possible in the DGCrack formulation?
 A! write a page on the differences between DGCrack and ADER-DG
@@ -24,7 +25,6 @@ testing the numerics:
 read:
 http://www.cs.utexas.edu/users/dagh/ch3.html
 https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations
-what are PETSc an Trilinos?
 http://scicomp.stackexchange.com/questions/1176/adaptive-mesh-refinement-with-perfectly-matched-layers
 read about perfectly matched layers
 learn a lot more about adaptive meshing techniques!
