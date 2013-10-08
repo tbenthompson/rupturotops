@@ -33,22 +33,25 @@ def run(data):
 
 def total_strain_plot():
     data = params.copy()
+    # pyp.plot(data['X'], data['initial_temp'])
+    # pyp.show()
+    # exit()
     finalTemp = run(data)
 
     pyp.plot(data['X'], finalTemp.T)
     pyp.show()
 
-
+    
     exp_strain = calc_strain(finalTemp.T, data)[:, -1]
 
     data['include_exp'] = False
     finalTemp = run(data)
     no_exp_strain = calc_strain(finalTemp.T, data)[:, -1]
     strain_diff = exp_strain - no_exp_strain
-    # _DEBUG()
     pyp.plot(data['X'], strain_diff)
     pyp.plot(data['X'], exp_strain)
     pyp.show()
+    print np.max(strain_diff)
 
 if __name__ == "__main__":
     # compare_exp_and_no_exp()

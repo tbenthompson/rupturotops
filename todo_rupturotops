@@ -4,8 +4,8 @@ A! give Jim an initial analysis of whether I think the problem is tractable
 
 current tasks:
 A! pose the wave equation in the antiplane case in the DG formulation
-A! solve the gaussian temperature profile problem with a nonlinear temperature dependent flow law, look at the dependence on time and distance from the fault, is the quick response or the slow response more important
---look at the segall book for initial stress profiles
+A! need a realistic during earthquake stress profile
+A! need a realistic temperature rise
 
 A! is the ADER-DG local time stepping possible in the DGCrack formulation?
 A! write a page on the differences between DGCrack and ADER-DG
