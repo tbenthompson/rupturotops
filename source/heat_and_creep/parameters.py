@@ -17,15 +17,15 @@ wetdiabase['youngsmodulus'] = 80e9  # Pa
 params = dict()
 params['material'] = wetdiabase
 params['points'] = 500
-params['steps'] = 100.0
+params['steps'] = 5.0
 params['delta_x'] = 0.001
-params['t_max'] = 1e-7
+params['t_max'] = 5.76e-7
 params['plot_every'] = 100
 params['include_exp'] = True
 
-params['stress'] = 500e7  # 100 MPa
+params['stress'] = 500e7    # 100 MPa
 params['length_scale'] = 1  # 1 meter, don't change this
-params['min_temp'] = 900  # Kelvins
+params['min_temp'] = 900    # Kelvins
 params['temp_mass'] = 500 * 1.5
 params['gaussian_width'] = 300
 finish_calc_params(params)
