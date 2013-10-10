@@ -15,11 +15,13 @@ wetdiabase['thermaldiffusivity'] = 7.4e-7  # m^2/sec
 wetdiabase['youngsmodulus'] = 80e9  # Pa
 
 params = dict()
+params['proj_name'] = 'heatcreep'
+params['run_name'] = 'explorations'
 params['material'] = wetdiabase
 params['points'] = 500
-params['steps'] = 5.0
-params['delta_x'] = 0.001
-params['t_max'] = 5.76e-7
+params['steps'] = 50.0
+params['delta_x'] = 0.0001
+params['t_max'] = 5.0e-7
 params['plot_every'] = 100
 params['include_exp'] = True
 
@@ -28,7 +30,6 @@ params['length_scale'] = 1  # 1 meter, don't change this
 params['min_temp'] = 900    # Kelvins
 params['temp_mass'] = 500 * 1.5
 params['gaussian_width'] = 300
-finish_calc_params(params)
 
 # params['initial_temp'] = np.zeros((params['points'])) + params['min_temp']
 #

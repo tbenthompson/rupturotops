@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as pyp
 from pdb import set_trace as _DEBUG
-from utilities import calc_strain
+from utilities import calc_strain, finish_calc_params
 from parameters import params
 import scipy.integrate
 
@@ -32,26 +32,32 @@ def run(data):
 
 
 def total_strain_plot():
+    finish_calc_params(params)
     data = params.copy()
     # pyp.plot(data['X'], data['initial_temp'])
     # pyp.show()
     # exit()
-    finalTemp = run(data)
-
-    pyp.plot(data['X'], finalTemp.T)
-    pyp.show()
-
-    
+    final_temp_exp = run(data)
     exp_strain = calc_strain(finalTemp.T, data)[:, -1]
 
+    # pyp.plot(data['X'], final_temp_exp.T)
+    # pyp.show()
+
     data['include_exp'] = False
-    finalTemp = run(data)
-    no_exp_strain = calc_strain(finalTemp.T, data)[:, -1]
+    final_temp_no_exp = run(data)
+    no_exp_strain = calc_strain(final_temp_no_exp.T, data)[:, -1]
+
     strain_diff = exp_strain - no_exp_strain
     pyp.plot(data['X'], strain_diff)
     pyp.plot(data['X'], exp_strain)
     pyp.show()
     print np.max(strain_diff)
+    data['results'] = dict()
+    data['results']['final_temp_exp'] = final_temp_exp
+    data['results']['final_temp_no_exp'] = final_temp_no_exp
+    data['results']['exp_strain'] = exp_strain
+    data['results']['no_exp_strain'] = no_exp_strain
+    data['results']['strain_diff'] = strain_diff
 
 if __name__ == "__main__":
     # compare_exp_and_no_exp()

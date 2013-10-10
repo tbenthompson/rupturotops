@@ -3,6 +3,9 @@ A! give Jim an initial analysis of whether I think the problem is tractable
 --figure out the necessary lower end of the length scale
 
 current tasks:
+A! maybe extend the one-d model to include stress evolution from the quasi-dynamic approximation
+A! maybe extend the ond-d model to incorporate full dynamics
+A! look up some papers by kelemen on elastic 
 A! need a realistic during earthquake stress profile
 A! need a realistic temperature rise
 A! consider using a better integrator in the heat/creep solution
@@ -16,6 +19,7 @@ https://github.com/carlomr/tspeed
 A! learn about the cohesive zone stuff in the day and lapusta paper 2005
 A! read about the extended element method
 A! get my hands on some codes!
+A! get nadia's code or reproduce the method
 A! read about viscoelastic wave propagation
 A! find the viscoelastic weak form
 
@@ -25,8 +29,6 @@ testing the numerics:
 --does it devolve to any analytical solutions
 
 read:
-http://www.cs.utexas.edu/users/dagh/ch3.html
-https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations
 http://scicomp.stackexchange.com/questions/1176/adaptive-mesh-refinement-with-perfectly-matched-layers
 read about perfectly matched layers
 learn a lot more about adaptive meshing techniques!
