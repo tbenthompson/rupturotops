@@ -7,3 +7,9 @@ http://www.mcs.anl.gov/petsc/
 http://www3.imperial.ac.uk/earthscienceandengineering/research/amcg/software
 
 maybe use virtualenv to 
+debugging in vim or visual debuggers: http://stackoverflow.com/questions/3536600/do-you-debug-c-code-in-vim-how
+
+deal.ii:
+http://www.math.tamu.edu/~bangerth/publications/2010-parsim2010.pdf
+http://cython.org/
+http://www.dealii.org/8.0.0/doxygen/tutorial/index.html
