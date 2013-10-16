@@ -3,14 +3,15 @@ A! give Jim an initial analysis of whether I think the problem is tractable
 --figure out the necessary lower end of the length scale
 
 current tasks:
+<<<<<<< HEAD
 A! maybe extend the one-d model to include stress evolution from the quasi-dynamic approximation
 A! maybe extend the ond-d model to incorporate full dynamics
 A! look up some papers by kelemen on elastic 
+=======
+A! pose the wave equation in the antiplane case in the DG formulation
+>>>>>>> parent of 4508474... found an interesting singularity
 A! need a realistic during earthquake stress profile
 A! need a realistic temperature rise
-A! consider using a better integrator in the heat/creep solution
-
-A! pose the wave equation in the antiplane case in the DG formulation
 
 A! is the ADER-DG local time stepping possible in the DGCrack formulation?
 A! write a page on the differences between DGCrack and ADER-DG

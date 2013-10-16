@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as pyp
-from pdb import set_trace as _DEBUG
+# from pdb import set_trace as _DEBUG
 from utilities import calc_strain, finish_calc_params
 from parameters import params
 import scipy.integrate
@@ -13,7 +13,7 @@ def run(data):
     def rhs(current_temp, t):
         # print t
         # if data['plot_every'] is not None and \
-                 # step % data['plot_every'] == 0:
+            # step % data['plot_every'] == 0:
         # pyp.plot(data['X'], current_temp)
 
         exp_term = 0
@@ -34,11 +34,11 @@ def run(data):
 def total_strain_plot():
     finish_calc_params(params)
     data = params.copy()
-    # pyp.plot(data['X'], data['initial_temp'])
-    # pyp.show()
+    pyp.plot(data['X'], data['initial_temp'], '.')
+    pyp.show()
     # exit()
     final_temp_exp = run(data)
-    exp_strain = calc_strain(finalTemp.T, data)[:, -1]
+    exp_strain = calc_strain(final_temp_exp.T, data)[:, -1]
 
     # pyp.plot(data['X'], final_temp_exp.T)
     # pyp.show()
