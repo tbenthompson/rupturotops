@@ -3,22 +3,18 @@ A! give Jim an initial analysis of whether I think the problem is tractable
 --figure out the necessary lower end of the length scale
 
 current tasks:
-<<<<<<< HEAD
-A! maybe extend the one-d model to include stress evolution from the quasi-dynamic approximation
-A! maybe extend the ond-d model to incorporate full dynamics
-A! look up some papers by kelemen on elastic 
-=======
+A! restart and successfully write a fdm method for the wave equation
+A! implement full elastodynamics in 1D
+A! download and successfully run eric dunham's mdsbi
+A! look up some papers by kelemen on thermal runaway
 A! pose the wave equation in the antiplane case in the DG formulation
->>>>>>> parent of 4508474... found an interesting singularity
-A! need a realistic during earthquake stress profile
-A! need a realistic temperature rise
 
+A! check out some of the better FDM implementations of earthquake dynamics
 A! is the ADER-DG local time stepping possible in the DGCrack formulation?
 A! write a page on the differences between DGCrack and ADER-DG
 A! compile all the relevant literature on discontinuous galerkin methods
 https://github.com/carlomr/tspeed
 A! learn about the cohesive zone stuff in the day and lapusta paper 2005
-A! read about the extended element method
 A! get my hands on some codes!
 A! get nadia's code or reproduce the method
 A! read about viscoelastic wave propagation

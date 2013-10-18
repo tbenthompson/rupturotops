@@ -1,5 +1,8 @@
-coding:
---run more tests of the code in its limiting cases
---try some cool slip distributions
-
-eventually start on the rate-and-state portion of the model
+Things to do:
+run the model correctly with the right numbers and such
+clean up the whole directory so that the modules can interface and there's one controlling script
+implement/clean up the data saving and loading modules
+test with a series of superimposed gaussians from different times going back different amounts of time, look at when it stabilizes, when does it stabilize?!
+test for various different temperature values
+parallelize in a clean and nice way
+provide more output
