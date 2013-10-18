@@ -8,6 +8,8 @@ import multiprocessing
 
 multiprocessing.Pool(4)
 
+exit(1)
+
 low_x = 0.0
 high_x = 1.0
 low_t = 0.01

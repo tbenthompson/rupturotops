@@ -1,5 +1,7 @@
 Things to do:
-run the model correctly with the right numbers and such
+finish cleaning up the code 
+
+test correctly with the right numbers and such
 clean up the whole directory so that the modules can interface and there's one controlling script
 implement/clean up the data saving and loading modules
 test with a series of superimposed gaussians from different times going back different amounts of time, look at when it stabilizes, when does it stabilize?!

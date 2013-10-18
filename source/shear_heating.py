@@ -1,10 +1,13 @@
 import numpy as np
 from matplotlib import pyplot as pyp
-# from pdb import set_trace as _DEBUG
-from utilities import calc_strain, finish_calc_params
-from parameters import params
 import scipy.integrate
+from utilities import calc_strain, finish_calc_params
+# from debug import _DEBUG
+from parameters import params
+from experiment import Experiment
 
+class ShearHeating(Experiment):
+    pass
 
 # boundary conditions are dirichlet and specified as the
 # first and last component of initial_temp
