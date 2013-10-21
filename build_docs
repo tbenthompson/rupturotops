@@ -1,0 +1,4 @@
+#!/bin/bash
+cd docs;
+./generate_modules;
+make html;
