@@ -1,0 +1,2 @@
+Implement very basic embarassingly parallel facilities. Initially, maybe just 
+in the Sweep class in order to speed parameter sweeps.
