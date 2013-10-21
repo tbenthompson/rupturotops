@@ -1,6 +1,7 @@
 import os
 import os.path
 import cPickle
+# I wrote this before this current design:
 # To be designed as follows:
 #   functions receive an object with the relevant parameters
 #   parameter categories are defined in other python files
@@ -9,7 +10,7 @@ import cPickle
 #   then, the data is saved in the relevant folder for that name
 #   allow options for a name prefix and then the lowest number not taken
 
-data_root = '/home/tbent/projects/viscosaur/data/'
+data_root = '/home/tbent/projects/viscosaur/data'
 
 
 class DataController(dict):

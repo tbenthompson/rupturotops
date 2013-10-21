@@ -1,3 +1,4 @@
+import datetime
 import shutil
 import os
 import os.path
@@ -58,30 +59,13 @@ class Experiment(object):
         """
         if self.data_loc is not None:
             return
-        folder_name = data_root + self.params.proj_name
+        folder_name = data_root + '/' + self.params.proj_name
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
-        existing_runs = os.listdir(folder_name)
-        new_run_folder_name = folder_name + '/' + \
-            self.lowest_open_space(self.params.run_name, existing_runs)
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        new_run_folder_name = folder_name + '/' + self.params.run_name + '_' + timestamp
         os.mkdir(new_run_folder_name)
         self.data_loc = new_run_folder_name
-
-    @staticmethod
-    def lowest_open_space(prefix, runs_list):
-        """
-        This function finds the lowest unused prefix# named directory in the
-        relevant folder.
-        """
-        # first, throw out everything in the folder names except the last digit
-        similar_runs = [run.replace(prefix, '') for run in
-                        runs_list if run.startswith(prefix)]
-        #chopped runs should only be numbers now, throw out any non-numeric
-        final_runs = [int(run) for run in similar_runs if run.isdigit()]
-        if len(final_runs) == 0:
-            return prefix + '0'
-        max_run = max(final_runs)
-        return prefix + str(max_run + 1)
 
 ##############################################################################
 # TESTS BELOW HERE
@@ -108,6 +92,7 @@ def test_experiment():
     assert foo.data.abc == 1
     foo.visualize()
     assert foo.data.fgi == 2
+    shutil.rmtree(foo.data_loc)
 
 
 def test_experiment_save():
@@ -115,27 +100,20 @@ def test_experiment_save():
     foo.compute()
     foo.visualize()
     foo.save()
-    params_saved = os.path.exists(data_root + '/test/test0/params.pkl')
-    data_saved = os.path.exists(data_root + '/test/test0/data.pkl')
+    root_loc = foo.data_loc
+    params_saved = os.path.exists(root_loc + '/params.pkl')
+    data_saved = os.path.exists(root_loc + '/data.pkl')
     assert params_saved is True
     assert data_saved is True
-    shutil.rmtree(data_root + 'test/test0')
-
-
-def test_lowest_open_space():
-    result = Experiment.lowest_open_space('abc', ['abc1', 'abc2', 'abc3'])
-    assert result == 'abc4'
-
-    result = Experiment.lowest_open_space('abc', [])
-    assert result == 'abc0'
-
-    result = Experiment.lowest_open_space('abc', ['def'])
-    assert result == 'abc0'
+    shutil.rmtree(root_loc)
 
 
 def test_assign_data_location():
     e = ExperimentTester(test_params)
     e._assign_data_location()
-    dir_exists = os.path.exists(data_root + '/test/test0')
+    root_loc = e.data_loc
+    dir_exists = os.path.exists(root_loc)
     assert dir_exists
-    shutil.rmtree(data_root + 'test/test0')
+    correct_path = (data_root + '/test/test_') in root_loc
+    assert correct_path is True
+    shutil.rmtree(root_loc)
