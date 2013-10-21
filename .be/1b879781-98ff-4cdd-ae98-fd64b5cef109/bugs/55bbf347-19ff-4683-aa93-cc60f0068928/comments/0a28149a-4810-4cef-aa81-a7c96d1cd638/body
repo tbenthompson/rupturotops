@@ -1,0 +1,7 @@
+
+This package claims to implement something that bridges the gap
+between DG methods and the Tromp SEM methods: https://github.com/carlomr/tspeed
+
+Compile a literature review of the relevant discontinuous galerkin stuff
+with respect to both hyperbolic, parabolic and nonlinear equations (
+waves are hyperbolic, temp diffusion is parabolic, nonlinearity from constitutive)

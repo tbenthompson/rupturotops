@@ -1,0 +1,6 @@
+To test numerics, I need some benchmark:
+--Does it devolve to the elastic case if there isn't any creep?
+--Does it devolve to the interseismic viscoelastic case if the creep is linear
+  and there aren't any rupture dynamics
+--Does it devolve to Takeuchi and Fialko if there isn't any fault heating or
+  rupture dynamics

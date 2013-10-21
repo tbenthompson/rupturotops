@@ -1,0 +1,3 @@
+Use the code in LN2013/fdm_wave but rewrite the equations in diagonalized
+form so that it is essentially two parallel scalar wave equations. Then,
+undiagonalize after computing the solution
