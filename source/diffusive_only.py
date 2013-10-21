@@ -21,9 +21,9 @@ t_domain = np.linspace(low_t, high_t, t_count)
 #assume N = 1
 
 P = 100 * 365 * 24 * 3600
-N = P * params['material']['creepconstant'] * params['stress'] ** params['material']['stressexponent']
-lambduh = params['material']['activationenergy'] / params['material']['R']
-l = np.sqrt(params['material']['thermaldiffusivity'] * P)
+N = P * params.material.creep_constant * params.stress ** params.material.stress_exponent
+lambduh = params.material.activation_energy / params.material.R
+l = np.sqrt(params.material.thermal_diffusivity * P)
 
 T_i = 673 / lambduh
 T_f = 676 / lambduh
@@ -67,7 +67,7 @@ for i in range(0,10000):
     if i % 1000 == 0:
         print total_temp
     total_temp += temp_fnc(0.1, float(i) + 0.5)
-# total_temp /= params['material']['R']/params['material']['activationenergy']
+# total_temp /= params.material.R/params.material.activationenergy
     # strain = calculate_strain()
 # pyp.plot(t_domain, temp_fnc(0, t_domain))
 # pyp.plot(t_domain, strainrate_fnc(0.1, t_domain))

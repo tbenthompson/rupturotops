@@ -9,11 +9,36 @@ import cPickle
 #   then, the data is saved in the relevant folder for that name
 #   allow options for a name prefix and then the lowest number not taken
 
+data_root = '/home/tbent/projects/viscosaur/data/'
+
 
 class DataController(dict):
-    def __init__(self, items=[]):
-        for item in items:
-            self[item[0]] = item[1]
+    """
+    The class extends the python dictionary to support using friendlier syntax:
+        data.key = value
+    instead of
+        data['key'] = value
+
+    The class also provides pickling capacities to store data and load data.
+    """
+    def __init__(self, *args, **kwargs):
+        self.update(*args, **kwargs)
+
+    def __getitem__(self, key):
+        return super(DataController,
+                     self).__getitem__(key)
+
+    def __setitem__(self, key, value):
+        return super(DataController,
+                     self).__setitem__(key, value)
+
+    def __delitem__(self, key):
+        return super(DataController,
+                     self).__delitem__(key)
+
+    def __contains__(self, key):
+        return super(DataController,
+                     self).__contains__(key)
 
     def __getattr__(self, attr):
         return self[attr]
@@ -21,27 +46,49 @@ class DataController(dict):
     def __setattr__(self, attr, val):
         self[attr] = val
 
-    def save(self, filename):
-        with open(filename, 'wb') as f:
-            cPickle.dump(self, f)
-
     def __reduce__(self):
-        #makes the object pickleable
+        # This function ensures that pickling is successful.
         items = [[k, self[k]] for k in self]
         inst_dict = vars(self).copy()
+        # Throw away all the variables that exist for the bare class
+        # where no parameters have been set. We just want to save parameters.
         for k in vars(DataController()):
             inst_dict.pop(k, None)
         if inst_dict:
             return (self.__class__, (items,), inst_dict)
         return self.__class__, (items,)
 
+    def save(self, filename):
+        #binary mode is important for pickling
+        with open(filename, 'wb') as f:
+            cPickle.dump(self, f)
+
     @staticmethod
     def load(filename):
+        #binary mode is important for pickling
         with open(filename, 'rb') as f:
             return cPickle.load(f)
 
+##############################################################################
+# TESTS BELOW HERE
+##############################################################################
 
-test_file = '../../data/test/data'
+test_file = data_root + '/test/data'
+
+
+def test_data_controller_in():
+    a = DataController(bcd=1)
+    exists = 'bcd' in a
+    assert exists is True
+    exists = 'ghi' in a
+    assert exists is False
+
+
+def test_data_controller_init():
+    b = DataController([('a', 1)])
+    assert b.a == 1
+    c = DataController(foo='bar')
+    assert c.foo == 'bar'
 
 
 def test_data_controller_access():
@@ -84,4 +131,4 @@ def test_real_parameters():
     from material import wetdiabase
     wetdiabase.save(test_file)
     new = DataController.load(test_file)
-    assert(new.activationenergy == wetdiabase.activationenergy)
+    assert(new.activation_energy == wetdiabase.activation_energy)
