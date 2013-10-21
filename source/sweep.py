@@ -1,5 +1,6 @@
 from core.experiment import Experiment
 
+
 class Sweep(Experiment):
     """
     Sweep runs another experiment multiple time with different parameter values.
@@ -8,13 +9,9 @@ class Sweep(Experiment):
     loop that test all parameter values. Ensure that the experiment being tested
     does not parallelize already. You would get suboptimal behavior.
     """
-    def __init__(self, sub_exp, param_name, values):
-        """
-        sub_exp = the subordinate experiment to be tested
-        param_name = the name of the parameter to be varied
-        values = the values to assign to the parameter
-        """
-        self.sub_exp = sub_exp
+
+    def __init__(self, sub_experiment, param_name, values):
+        self.sub_experiment = sub_experiment
         self.param_name = param_name
         self.values = values
 
