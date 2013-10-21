@@ -41,7 +41,9 @@ class DataController(dict):
             return cPickle.load(f)
 
 
-test_file = '../data/test/data'
+test_file = '../../data/test/data'
+
+
 def test_data_controller_access():
     d = DataController()
     d['abc'] = 1

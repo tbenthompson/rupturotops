@@ -16,6 +16,14 @@ Sphinx can be installed in Ubuntu using the command::
     
     sudo apt-get install python-sphinx
 
+To build the Sphinx documentation, enter the "docs" folder and run the commands::
+
+    ./generate_modules
+    make html
+
+The first command generates the autodoc modules from the source code and the second
+creates the sphinx documentation tree
+
 **Bugs Everywhere** is used for issue and bug tracking and for storing ideas for the future.
 Bugs Everywhere can be downloaded from http://bugseverywhere.org/. A detailed
 description of the various installation methods is found at this 

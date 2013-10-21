@@ -1,0 +1,181 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.data_controller &mdash; viscosaur 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="viscosaur 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">viscosaur 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.data_controller</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">cPickle</span>
+<span class="c"># To be designed as follows:</span>
+<span class="c">#   functions receive an object with the relevant parameters</span>
+<span class="c">#   parameter categories are defined in other python files</span>
+<span class="c">#   the output values are saved in a specific location</span>
+<span class="c">#   the run is given a specific name</span>
+<span class="c">#   then, the data is saved in the relevant folder for that name</span>
+<span class="c">#   allow options for a name prefix and then the lowest number not taken</span>
+
+
+<div class="viewcode-block" id="DataController"><a class="viewcode-back" href="../../modules/core.html#core.data_controller.DataController">[docs]</a><span class="k">class</span> <span class="nc">DataController</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+<div class="viewcode-block" id="DataController.save"><a class="viewcode-back" href="../../modules/core.html#core.data_controller.DataController.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">cPickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#makes the object pickleable</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[[</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="n">inst_dict</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">DataController</span><span class="p">()):</span>
+            <span class="n">inst_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inst_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="p">(</span><span class="n">items</span><span class="p">,),</span> <span class="n">inst_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="p">(</span><span class="n">items</span><span class="p">,)</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DataController.load"><a class="viewcode-back" href="../../modules/core.html#core.data_controller.DataController.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+</div></div>
+<span class="n">test_file</span> <span class="o">=</span> <span class="s">&#39;../../data/test/data&#39;</span>
+
+
+<div class="viewcode-block" id="test_data_controller_access"><a class="viewcode-back" href="../../modules/core.html#core.data_controller.test_data_controller_access">[docs]</a><span class="k">def</span> <span class="nf">test_data_controller_access</span><span class="p">():</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">DataController</span><span class="p">()</span>
+    <span class="n">d</span><span class="p">[</span><span class="s">&#39;abc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">d</span><span class="o">.</span><span class="n">abc</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="n">d</span><span class="o">.</span><span class="n">ghi</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;ghi&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+
+</div>
+<div class="viewcode-block" id="test_data_save"><a class="viewcode-back" href="../../modules/core.html#core.data_controller.test_data_save">[docs]</a><span class="k">def</span> <span class="nf">test_data_save</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">test_file</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">DataController</span><span class="p">()</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">abc</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">defghi</span> <span class="o">=</span> <span class="n">DataController</span><span class="p">()</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">defghi</span><span class="o">.</span><span class="n">abc</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">test_file</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="test_data_load"><a class="viewcode-back" href="../../modules/core.html#core.data_controller.test_data_load">[docs]</a><span class="k">def</span> <span class="nf">test_data_load</span><span class="p">():</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">DataController</span><span class="p">()</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">abc</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">DataController</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">abc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">d</span><span class="o">.</span><span class="n">abc</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">defghi</span> <span class="o">=</span> <span class="n">DataController</span><span class="p">()</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">defghi</span><span class="o">.</span><span class="n">abc</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">DataController</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">abc</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">defghi</span><span class="o">.</span><span class="n">abc</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="test_real_parameters"><a class="viewcode-back" href="../../modules/core.html#core.data_controller.test_real_parameters">[docs]</a><span class="k">def</span> <span class="nf">test_real_parameters</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">material</span> <span class="kn">import</span> <span class="n">wetdiabase</span>
+    <span class="n">wetdiabase</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="n">new</span> <span class="o">=</span> <span class="n">DataController</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">activationenergy</span> <span class="o">==</span> <span class="n">wetdiabase</span><span class="o">.</span><span class="n">activationenergy</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">viscosaur 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, T. Ben Thompson.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

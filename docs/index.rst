@@ -9,12 +9,20 @@ Welcome to viscosaur's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   intro
-   developer
+    intro
+    developer
 
+Module
+======
 
+.. toctree::
+    :maxdepth: 20
+    :numbered:
+    :glob:
+
+    modules/*
 
 Indices and tables
 ==================

@@ -3,6 +3,8 @@ import os
 import os.path
 from data_controller import DataController
 
+data_root = '/home/tbent/projects/viscosaur/data/'
+
 
 class Experiment(object):
     def __init__(self, params):
@@ -25,8 +27,7 @@ class Experiment(object):
         self.data.save()
 
     def assign_data_location(self):
-        root = '/home/tbent/projects/viscosaur/data/'
-        folder_name = root + self.params.proj_name
+        folder_name = data_root + self.params.proj_name
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
         existing_runs = os.listdir(folder_name)
@@ -64,6 +65,6 @@ def test_assign_data_location():
     params['run_name'] = 'test'
     e = Experiment(params)
     e.assign_data_location()
-    dir_exists = os.path.exists('/home/tbent/projects/viscosaur/data/test/test0')
+    dir_exists = os.path.exists(data_root + '/test/test0')
     assert dir_exists
-    shutil.rmtree('/home/tbent/projects/viscosaur/data/test/test0')
+    shutil.rmtree(data_root + '/test/test0')

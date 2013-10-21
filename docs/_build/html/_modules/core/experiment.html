@@ -1,0 +1,164 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>core.experiment &mdash; viscosaur 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="viscosaur 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">viscosaur 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for core.experiment</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">data_controller</span> <span class="kn">import</span> <span class="n">DataController</span>
+
+<span class="n">data_root</span> <span class="o">=</span> <span class="s">&#39;/home/tbent/projects/viscosaur/data/&#39;</span>
+
+
+<div class="viewcode-block" id="Experiment"><a class="viewcode-back" href="../../modules/core.html#core.experiment.Experiment">[docs]</a><span class="k">class</span> <span class="nc">Experiment</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">DataController</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Experiment.compute"><a class="viewcode-back" href="../../modules/core.html#core.experiment.Experiment.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compute</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_compute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;_compute is still a stub method&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Experiment.visualize"><a class="viewcode-back" href="../../modules/core.html#core.experiment.Experiment.visualize">[docs]</a>    <span class="k">def</span> <span class="nf">visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visualize</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_visualize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;_visualize is still a stub method&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Experiment.save"><a class="viewcode-back" href="../../modules/core.html#core.experiment.Experiment.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Experiment.assign_data_location"><a class="viewcode-back" href="../../modules/core.html#core.experiment.Experiment.assign_data_location">[docs]</a>    <span class="k">def</span> <span class="nf">assign_data_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">folder_name</span> <span class="o">=</span> <span class="n">data_root</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">proj_name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folder_name</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">folder_name</span><span class="p">)</span>
+        <span class="n">existing_runs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder_name</span><span class="p">)</span>
+        <span class="n">new_run_folder_name</span> <span class="o">=</span> <span class="n">folder_name</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">lowest_open_space</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">run_name</span><span class="p">,</span> <span class="n">existing_runs</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">new_run_folder_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">data_loc</span> <span class="o">=</span> <span class="n">new_run_folder_name</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Experiment.lowest_open_space"><a class="viewcode-back" href="../../modules/core.html#core.experiment.Experiment.lowest_open_space">[docs]</a>    <span class="k">def</span> <span class="nf">lowest_open_space</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">runs_list</span><span class="p">):</span>
+        <span class="n">similar_runs</span> <span class="o">=</span> <span class="p">[</span><span class="n">run</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span>
+                        <span class="n">runs_list</span> <span class="k">if</span> <span class="n">run</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)]</span>
+        <span class="c">#chopped runs should only be numbers now, throw out the others</span>
+        <span class="n">final_runs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">run</span><span class="p">)</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">similar_runs</span> <span class="k">if</span> <span class="n">run</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_runs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s">&#39;0&#39;</span>
+        <span class="n">max_run</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">final_runs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_run</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="test_lowest_open_space"><a class="viewcode-back" href="../../modules/core.html#core.experiment.test_lowest_open_space">[docs]</a><span class="k">def</span> <span class="nf">test_lowest_open_space</span><span class="p">():</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">Experiment</span><span class="o">.</span><span class="n">lowest_open_space</span><span class="p">(</span><span class="s">&#39;abc&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;abc1&#39;</span><span class="p">,</span> <span class="s">&#39;abc2&#39;</span><span class="p">,</span> <span class="s">&#39;abc3&#39;</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="s">&#39;abc4&#39;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">Experiment</span><span class="o">.</span><span class="n">lowest_open_space</span><span class="p">(</span><span class="s">&#39;abc&#39;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="s">&#39;abc0&#39;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">Experiment</span><span class="o">.</span><span class="n">lowest_open_space</span><span class="p">(</span><span class="s">&#39;abc&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;def&#39;</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="s">&#39;abc0&#39;</span>
+
+</div>
+<div class="viewcode-block" id="test_assign_data_location"><a class="viewcode-back" href="../../modules/core.html#core.experiment.test_assign_data_location">[docs]</a><span class="k">def</span> <span class="nf">test_assign_data_location</span><span class="p">():</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">DataController</span><span class="p">()</span>
+    <span class="n">params</span><span class="p">[</span><span class="s">&#39;proj_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;test&#39;</span>
+    <span class="n">params</span><span class="p">[</span><span class="s">&#39;run_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;test&#39;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+    <span class="n">e</span><span class="o">.</span><span class="n">assign_data_location</span><span class="p">()</span>
+    <span class="n">dir_exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">data_root</span> <span class="o">+</span> <span class="s">&#39;/test/test0&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dir_exists</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">data_root</span> <span class="o">+</span> <span class="s">&#39;/test/test0&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">viscosaur 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, T. Ben Thompson.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

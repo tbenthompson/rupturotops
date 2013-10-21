@@ -1,6 +1,7 @@
-from debug import _DEBUG
-from shear_heating import ShearHeating
-from shear_heating_params import params
+# from core.debug import _DEBUG
+from shear_heating.shear_heating import ShearHeating
+from shear_heating.shear_heating_params import params
+
 
 def main():
     experiments = [ShearHeating(params)]

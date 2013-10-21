@@ -26,6 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="viscosaur 0.1 documentation" href="index.html" />
+    <link rel="next" title="4.1. core Package" href="modules/core.html" />
     <link rel="prev" title="Introduction" href="intro.html" /> 
   </head>
   <body>
@@ -35,6 +36,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules/core.html" title="4.1. core Package"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="intro.html" title="Introduction"
              accesskey="P">previous</a> |</li>
@@ -51,19 +58,31 @@
 <h1>Viscosaur Developer Reference<a class="headerlink" href="#viscosaur-developer-reference" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="tools">
 <h2>Tools<a class="headerlink" href="#tools" title="Permalink to this headline">¶</a></h2>
-<p>Tools used in the development of viscosaur:</p>
+<p>Some important tools to know about for the development of viscosaur:</p>
 <p><strong>Git</strong> is used for distributed version control.
 The git repository is located at <a class="reference external" href="https://github.com/tbenthompson/viscosaur">https://github.com/tbenthompson/viscosaur</a>.
 A huge list of useful information for git beginners is on
 <a class="reference external" href="http://stackoverflow.com/questions/315911/git-for-beginners-the-definitive-practical-guide/1350157#1350157/">stackoverflow</a></p>
 <p><strong>Sphinx</strong> is used for this documentation and the documentation is the &#8220;docs&#8221; folder.
+If you need to generate the documentation,
 Sphinx can be installed in Ubuntu using the command:</p>
 <div class="highlight-python"><pre>sudo apt-get install python-sphinx</pre>
 </div>
+<p>To build the Sphinx documentation, enter the &#8220;docs&#8221; folder and run the commands:</p>
+<div class="highlight-python"><pre>./generate_modules
+make html</pre>
+</div>
+<p>The first command generates the autodoc modules from the source code and the second
+creates the sphinx documentation tree</p>
 <p><strong>Bugs Everywhere</strong> is used for issue and bug tracking and for storing ideas for the future.
-Bugs Everywhere can be downloaded from <a class="reference external" href="http://bugseverywhere.org/">http://bugseverywhere.org/</a>. A detail detailed
+Bugs Everywhere can be downloaded from <a class="reference external" href="http://bugseverywhere.org/">http://bugseverywhere.org/</a>. A detailed
 description of the various installation methods is found at this
-<a class="reference external" href="http://docs.bugseverywhere.org/master/install.html/">link</a>.</p>
+<a class="reference external" href="http://docs.bugseverywhere.org/master/install.html/">link</a>.
+To install, I downloaded the latest stable source, modified the Makefile
+to install to &#8220;/usr/local&#8221; and then ran:</p>
+<div class="highlight-python"><pre>make
+make install</pre>
+</div>
 </div>
 </div>
 
@@ -84,6 +103,9 @@ description of the various installation methods is found at this
   <h4>Previous topic</h4>
   <p class="topless"><a href="intro.html"
                         title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="modules/core.html"
+                        title="next chapter">4.1. core Package</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/developer.txt"
@@ -112,6 +134,12 @@ description of the various installation methods is found at this
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules/core.html" title="4.1. core Package"
+             >next</a> |</li>
         <li class="right" >
           <a href="intro.html" title="Introduction"
              >previous</a> |</li>

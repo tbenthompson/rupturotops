@@ -1,3 +1,5 @@
+the ampuero sem2dpack stuff
+eric dunham's SBIEM code
 http://www.public.iastate.edu/~rossmani/software.html -- "DOGPACK"
 GLUMpy for on-the-fly visualization using opengl
 PyClaw for hyperbolic pdes using finite volume method -- implements riemann solvers, so it might be a good source for codes on that
