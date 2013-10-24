@@ -24,12 +24,14 @@ class Debugger(object):
     def __init__(self):
         self.times_invoked = 0
 
-    def __call__(self, times):
+    def __call__(self, times=1):
         if times <= self.times_invoked:
             return
         self.times_invoked += 1
         pdb.set_trace()
 
 
-sys.excepthook = info
+def setup_debug():
+    sys.excepthook = info
+
 _DEBUG = Debugger()

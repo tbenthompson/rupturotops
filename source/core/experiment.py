@@ -14,9 +14,14 @@ class Experiment(object):
     to implement are "_initialize", "_compute" and "_visualize".
 
     The class provides methods to save data automatically to a central location.
+
+    By convention a subclass should never modify the parameters passed to it. Use
+    self.data.var_name or self.var_name depending on whether the data should be saved
+    or not
     """
     def __init__(self, params):
         self.params = params
+        self.material = params.material
         self.data = DataController()
         self.data_loc = None
         self._assign_data_location()

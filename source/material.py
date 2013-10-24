@@ -11,3 +11,4 @@ wetdiabase.creep_constant = 2.2e-4 * 10 ** (-6 * 3.4)  # (Pa^-n)/sec
 wetdiabase.thermal_diffusivity = 7.37e-7  # m^2/sec
 wetdiabase.youngs_modulus = 80e9  # Pa
 wetdiabase.poisson = 0.25
+wetdiabase.shear_modulus = wetdiabase.youngs_modulus / (2 * (1 + wetdiabase.poisson))
