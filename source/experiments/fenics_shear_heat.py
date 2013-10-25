@@ -6,6 +6,7 @@ from pdb import set_trace as _DEBUG
 # import ufl.operators
 from core.experiment import Experiment
 from core.constants import consts
+from gryphon.gryphon import ESDIRK
 
 
 class ShearHeatingFenics(Experiment):
@@ -15,7 +16,6 @@ class ShearHeatingFenics(Experiment):
     def _initialize(self):
         # This nondimensionalization code is replicated from shear_heating.py and should
         # eventually be migrated to a central location
-
         self.data.length_scale = np.sqrt(self.material.density /
                                          self.material.shear_modulus) * \
             self.material.thermal_diffusivity
@@ -37,78 +37,57 @@ class ShearHeatingFenics(Experiment):
         self.data.stress = self.params.stress / self.data.stress_scale
         self.data.source_term = self.params.source_term * self.data.time_scale / self.params.delta_temp
 
-        # Create mesh and define function space
-        self.mesh = dfn.IntervalMesh(self.params.x_points, self.data.x_min, self.data.x_max)
-        self.V = dfn.FunctionSpace(self.mesh, 'CG', 2)
-
-        # Define boundary conditions -- gaussian initial conditions
-        self.u0 = dfn.Constant(0.0)
-        self.bc = dfn.DirichletBC(self.V, dfn.Constant(0.0), lambda x, on_bndry: on_bndry)
-
         class SourceTermExpr(dfn.Expression):
-            def __init__(self, src):
+            def __init__(self, src, ls):
                 self.src = src
+                self.ls = ls
 
             def eval(self, value, x):
                 value[0] = 0.0
-                if x[0] == 0.0:
+                if abs(x[0]) <= (1.0 / self.ls):
                     value[0] = self.src
-        source = SourceTermExpr(self.data.source_term)
+        source = SourceTermExpr(self.data.source_term, self.data.length_scale)
 
-        #initial conditions
-        self.u_ = dfn.interpolate(self.u0, self.V)
-        self.u_old = dfn.interpolate(self.u0, self.V)
-        self.s_ = dfn.interpolate(dfn.Constant(0.0), self.V)
-        self.s_old = dfn.interpolate(dfn.Constant(0.0), self.V)
+        # Create mesh and define function space
+        self.mesh = dfn.RectangleMesh(self.data.x_min, self.data.x_min, self.data.x_max, self.data.x_max, self.params.x_points, self.params.x_points)
+        self.V = dfn.FunctionSpace(self.mesh, 'CG', 2)
+        self.ME = self.V * self.V
+
+        # Define boundary conditions -- gaussian initial conditions
+        W = dfn.Function(self.ME)
+        W.interpolate(dfn.Constant((0.0, 0.0)))
+        self.u, self.s = dfn.split(W)
+        self.bc = dfn.DirichletBC(self.ME, dfn.Constant((0.0, 0.0)), lambda x, on_bndry: on_bndry)
 
         # Define variational problem
-        self.du = dfn.TrialFunction(self.V)
-        self.du2 = dfn.TrialFunction(self.V)
-        self.v = dfn.TestFunction(self.V)
-        self.T = self.data.delta_t * \
-            dfn.inner(dfn.nabla_grad(self.u_ + self.s_), dfn.nabla_grad(self.v)) * \
-            dfn.dx + \
-            self.u_ * self.v * dfn.dx - \
-            self.u_old * self.v * dfn.dx - \
-            self.data.delta_t * source * self.v * dfn.dx
+        self.v1, self.v2 = dfn.TestFunctions(self.ME)
+        self.temp_RHS = - dfn.inner(dfn.nabla_grad(self.u + self.s), dfn.nabla_grad(self.v1)) * dfn.dx + \
+            source * self.v1 * dfn.dx
 
-        self.SH = self.s_ * self.v * dfn.dx - \
-            self.s_old * self.v * dfn.dx - \
-            self.data.delta_t * self.data.inv_prandtl * self.data.eckert * \
+        self.shear_heat_RHS = self.data.inv_prandtl * self.data.eckert * \
             self.data.stress ** (self.material.stress_exponent + 1) * \
             dfn.exp(-(self.material.activation_energy / consts.R) /
-                    (self.params.low_temp + self.params.delta_temp * (self.u_ + self.s_))) * \
-            self.v * dfn.dx
+                    (self.params.low_temp + self.params.delta_temp * (self.u + self.s))) * \
+            self.v2 * dfn.dx
 
-        self.V = self.v_ * self.v * dfn.dx - \
+        T = [0, self.data.t_max]
+        self.solver = ESDIRK(T, W, [self.temp_RHS, self.shear_heat_RHS], bcs=[self.bc])
+        self.solver.is_linear = False
+        self.solver.parameters['timestepping']['dt'] = self.data.delta_t
+        self.solver.parameters["timestepping"]["absolute_tolerance"] = 1e-7
 
-
-        # J must be a Jacobian (Gateaux derivative in direction of du)
-        self.T_J = dfn.derivative(self.T, self.u_, self.du)
-        self.SH_J = dfn.derivative(self.SH, self.s_, self.du2)
-        #info(prm, True)
 
     def _compute(self):
-        dfn.set_log_level(16)
+        self.solver.parameters["verbose"] = True
+        self.solver.parameters["drawplot"] = True
+        # self.solver.parameters["output"]["path"] = "GrayScott"
+        self.solver.parameters["output"]["statistics"] = True
 
-        problem = dfn.NonlinearVariationalProblem(self.F, self.u_, self.bc, self.J)
-        problem2 = dfn.NonlinearVariationalProblem(self.F2, self.s_, self.bc, self.J2)
-        solver = dfn.NonlinearVariationalSolver(problem)
-        solver2 = dfn.NonlinearVariationalSolver(problem2)
-        _DEBUG()
-        # t = self.data.initial_temp_start_time + self.data.delta_t
-        t = self.data.delta_t
-        t_max = self.data.t_max
-        while t <= t_max:
-            solver.solve()
-            solver2.solve()
-            t += self.data.delta_t
-            self.u_old.assign(self.u_)
-            self.s_old.assign(self.s_)
-            # percentage = abs(((t / t_max) * 1000) - np.floor((t / t_max) * 1000))
-            # if percentage <= ((1000 * self.data.delta_t) / t_max):
-            pyp.plot(self.s_.vector().array())
-        pyp.show()
+        # Supress some FEniCS output
+        # dfn.set_log_level(dfn.WARNING)
+
+        # Solve the problem
+        self.soln = self.solver.solve()
 
     def _visualize(self):
         pyp.plot(self.u_.vector().array())

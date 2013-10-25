@@ -2,15 +2,14 @@ from core.data_controller import DataController
 from experiments.fenics_shear_heat import ShearHeatingFenics
 from parameters.material import wetdiabase
 from core.constants import consts
-import numpy as np
 
 params = DataController()
 params.material = wetdiabase
-params.delta_t = 100 * consts.secs_in_a_year
-params.t_max = 10000 * consts.secs_in_a_year
-params.x_min = -10000
-params.x_max = 10000
-params.x_points = 4001
+params.delta_t = 0.5 * consts.secs_in_a_year
+params.t_max = 10 * consts.secs_in_a_year
+params.x_min = -100
+params.x_max = 100
+params.x_points = 101
 params.temp_pulse_size = 3.0  # kelvins
 params.stress = 100e6
 params.low_temp = 900.0  # kelvins
