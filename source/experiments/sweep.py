@@ -8,6 +8,8 @@ class Sweep(Experiment):
     By setting parallelize = True, Sweep will parallelize the
     loop that test all parameter values. Ensure that the experiment being tested
     does not parallelize already. You would get suboptimal behavior.
+
+    Currently not yet implemented.
     """
 
     def __init__(self, sub_experiment, param_name, values):

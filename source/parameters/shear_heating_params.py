@@ -2,12 +2,13 @@ from core.data_controller import DataController
 from core.constants import consts
 from material import wetdiabase
 import numpy as np
+from shear_heating import ShearHeating
 
 params = DataController()
 params.material = wetdiabase
-params.x_points = 10001  # must be odd
+params.x_points = 101  # must be odd
 params.x = np.linspace(-20000, 20000, params.x_points)  # meters
-params.t_max = 1000000
+params.t_max = 100
 params.t = np.linspace(0, consts.secs_in_a_year * params.t_max, 100)  # time
 params.temp_pulse_size = 3.0  # kelvins
 # params.initial_temp_start_time = 1.0e6
@@ -31,3 +32,5 @@ params.plot_init_cond = False
 params.plot_temp_time = True
 params.plot_strain_time = False
 params.plot_every = 10  # time steps
+
+experiment = ShearHeating(params)

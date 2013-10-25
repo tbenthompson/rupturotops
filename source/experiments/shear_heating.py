@@ -10,7 +10,7 @@ class ShearHeating(Experiment):
 
     def _initialize(self):
         """
-        Nondimensionalizes all the inputs.
+        Nondimensionalizes all the inputs. All the relevant scales are stored.
         """
         self.data.length_scale = np.sqrt(self.material.density /
                                          self.material.shear_modulus) * \
@@ -51,7 +51,7 @@ class ShearHeating(Experiment):
         Dirichlet boundary conditions are applied at the boundaries. The value remains
         equal to whatever it was in the initial conditions
 
-        ADD EQUATION THAT IT IS SOLVING
+        ADD EQUATION THAT IT IS SOLVING in MathJax
         """
         # _DEBUG()
         def rhs(current_temp, t):
@@ -65,22 +65,22 @@ class ShearHeating(Experiment):
 
             retval = np.zeros(self.data.x.shape)
             retval[1:-1] += diffusion_term + exp_term + self.data.source_term[1:-1]
-            _DEBUG()
             return retval
 
+        #The odeint function utilizes LSODA in ODEPACK, a fortran routine that alternates between
+        #various multistep methods depending on the estimated stiffness of the equation.
         self.data.temp_time = scipy.integrate.odeint(rhs, self.data.initial_temp, self.data.t)
 
     def calc_strain(self):
         """
         Integrates the temperature-time data to find the strain-time data.
-
+        Uses simpson's rule.
         ADD EQUATION THAT IT SOLVES
         """
         tointegrate = self.data.inv_prandtl * \
             self.data.stress ** self.material.stress_exponent * \
             np.exp(self._arrhenius_power(self.data.temp_time))
-        dt = self.data.t[1] / len(self.data.t)
-        self.data.strain_time = scipy.integrate.cumtrapz(tointegrate, dx=dt)
+        self.data.strain_time = scipy.integrate.simps(tointegrate.T, self.data.t)
 
     def _visualize(self):
         if self.params.plot_init_cond:

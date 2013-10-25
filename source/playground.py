@@ -1,4 +1,4 @@
-from material import wetdiabase
+from parameters.material import wetdiabase
 from math import exp
 from core.constants import consts
 

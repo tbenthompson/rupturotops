@@ -15,3 +15,7 @@ deal.ii:
 http://www.math.tamu.edu/~bangerth/publications/2010-parsim2010.pdf
 http://cython.org/
 http://www.dealii.org/8.0.0/doxygen/tutorial/index.html
+
+software dev stuff:
+setup travis for continuous integration
+setup a server somewhere for bug tracking

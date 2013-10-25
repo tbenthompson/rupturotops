@@ -26,21 +26,21 @@
 
 
 
-    "status": "wontfix", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Sweep test the simple diffusion model", 
+    "summary": "Learn MathJax and add some of the equations into the documentation in files.", 
 
 
 
 
 
 
-    "time": "Mon, 21 Oct 2013 03:49:05 +0000"
+    "time": "Thu, 24 Oct 2013 17:42:38 +0000"
 
 
 

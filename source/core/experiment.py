@@ -56,6 +56,9 @@ class Experiment(object):
         self.params.save(self.data_loc + '/params.pkl')
         self.data.save(self.data_loc + '/data.pkl')
 
+    def load(self, filename):
+        self.data = DataController.load(filename)
+
     def _assign_data_location(self):
         """
         This assigns a data folder to the experiment. The folder is chosen
