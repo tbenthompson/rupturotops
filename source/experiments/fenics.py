@@ -20,7 +20,7 @@ bc = dfn.DirichletBC(V, u0, u0_boundary)
 
 deltaT = 0.001
 
-P = 
+P = 1
 
 #initial conditions
 u_ = dfn.interpolate(u0, V)
