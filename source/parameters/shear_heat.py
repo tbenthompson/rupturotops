@@ -2,7 +2,7 @@ from core.data_controller import DataController
 from core.constants import consts
 from material import wetdiabase
 import numpy as np
-from shear_heating import ShearHeating
+from experiments.shear_heating import ShearHeating
 
 params = DataController()
 params.material = wetdiabase

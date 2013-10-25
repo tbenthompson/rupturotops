@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>4.1. core Package &mdash; viscosaur 0.1 documentation</title>
+    <title>3.1. core Package &mdash; viscosaur 0.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -26,9 +26,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="viscosaur 0.1 documentation" href="../index.html" />
-    <link rel="up" title="4. Project Modules" href="modules.html" />
-    <link rel="next" title="4.2. diffusive_only Module" href="diffusive_only.html" />
-    <link rel="prev" title="4. Project Modules" href="modules.html" /> 
+    <link rel="up" title="3. Project Modules" href="modules.html" />
+    <link rel="next" title="3.2. experiments Package" href="experiments.html" />
+    <link rel="prev" title="3. Project Modules" href="modules.html" /> 
   </head>
   <body>
     <div class="related">
@@ -41,13 +41,13 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="diffusive_only.html" title="4.2. diffusive_only Module"
+          <a href="experiments.html" title="3.2. experiments Package"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="modules.html" title="4. Project Modules"
+          <a href="modules.html" title="3. Project Modules"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">viscosaur 0.1 documentation</a> &raquo;</li>
-          <li><a href="modules.html" accesskey="U">4. Project Modules</a> &raquo;</li> 
+          <li><a href="modules.html" accesskey="U">3. Project Modules</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,20 +57,27 @@
           <div class="body">
             
   <div class="section" id="core-package">
-<h1>4.1. core Package<a class="headerlink" href="#core-package" title="Permalink to this headline">¶</a></h1>
+<h1>3.1. core Package<a class="headerlink" href="#core-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>4.1.1. <a class="reference internal" href="#module-core" title="core"><tt class="xref py py-mod docutils literal"><span class="pre">core</span></tt></a> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>3.1.1. <a class="reference internal" href="#module-core" title="core"><tt class="xref py py-mod docutils literal"><span class="pre">core</span></tt></a> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-core"></span><p>HI</p>
 </div>
 <div class="section" id="module-core.constants">
-<span id="constants-module"></span><h2>4.1.2. <tt class="xref py py-mod docutils literal"><span class="pre">constants</span></tt> Module<a class="headerlink" href="#module-core.constants" title="Permalink to this headline">¶</a></h2>
+<span id="constants-module"></span><h2>3.1.2. <tt class="xref py py-mod docutils literal"><span class="pre">constants</span></tt> Module<a class="headerlink" href="#module-core.constants" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-core.data_controller">
-<span id="data-controller-module"></span><h2>4.1.3. <tt class="xref py py-mod docutils literal"><span class="pre">data_controller</span></tt> Module<a class="headerlink" href="#module-core.data_controller" title="Permalink to this headline">¶</a></h2>
+<span id="data-controller-module"></span><h2>3.1.3. <tt class="xref py py-mod docutils literal"><span class="pre">data_controller</span></tt> Module<a class="headerlink" href="#module-core.data_controller" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="core.data_controller.DataController">
-<em class="property">class </em><tt class="descclassname">core.data_controller.</tt><tt class="descname">DataController</tt><big>(</big><em>items=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="../_modules/core/data_controller.html#DataController"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data_controller.DataController" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">core.data_controller.</tt><tt class="descname">DataController</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/core/data_controller.html#DataController"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data_controller.DataController" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></p>
+<dl class="docutils">
+<dt>The class extends the python dictionary to support using friendlier syntax:</dt>
+<dd>data.key = value</dd>
+<dt>instead of</dt>
+<dd>data[&#8216;key&#8217;] = value</dd>
+</dl>
+<p>The class also provides pickling capacities to store data and load data.</p>
 <dl class="staticmethod">
 <dt id="core.data_controller.DataController.load">
 <em class="property">static </em><tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/core/data_controller.html#DataController.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data_controller.DataController.load" title="Permalink to this definition">¶</a></dt>
@@ -86,6 +93,16 @@
 <dl class="function">
 <dt id="core.data_controller.test_data_controller_access">
 <tt class="descclassname">core.data_controller.</tt><tt class="descname">test_data_controller_access</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/core/data_controller.html#test_data_controller_access"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.data_controller.test_data_controller_access" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.data_controller.test_data_controller_in">
+<tt class="descclassname">core.data_controller.</tt><tt class="descname">test_data_controller_in</tt><big>(</big><big>)</big><a class="headerlink" href="#core.data_controller.test_data_controller_in" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.data_controller.test_data_controller_init">
+<tt class="descclassname">core.data_controller.</tt><tt class="descname">test_data_controller_init</tt><big>(</big><big>)</big><a class="headerlink" href="#core.data_controller.test_data_controller_init" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -105,7 +122,7 @@
 
 </div>
 <div class="section" id="module-core.debug">
-<span id="debug-module"></span><h2>4.1.4. <tt class="xref py py-mod docutils literal"><span class="pre">debug</span></tt> Module<a class="headerlink" href="#module-core.debug" title="Permalink to this headline">¶</a></h2>
+<span id="debug-module"></span><h2>3.1.4. <tt class="xref py py-mod docutils literal"><span class="pre">debug</span></tt> Module<a class="headerlink" href="#module-core.debug" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="core.debug.Debugger">
 <em class="property">class </em><tt class="descclassname">core.debug.</tt><tt class="descname">Debugger</tt><a class="reference internal" href="../_modules/core/debug.html#Debugger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.debug.Debugger" title="Permalink to this definition">¶</a></dt>
@@ -117,38 +134,55 @@
 <tt class="descclassname">core.debug.</tt><tt class="descname">info</tt><big>(</big><em>type</em>, <em>value</em>, <em>tb</em><big>)</big><a class="reference internal" href="../_modules/core/debug.html#info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.debug.info" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="function">
+<dt id="core.debug.setup_debug">
+<tt class="descclassname">core.debug.</tt><tt class="descname">setup_debug</tt><big>(</big><big>)</big><a class="headerlink" href="#core.debug.setup_debug" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="module-core.experiment">
-<span id="experiment-module"></span><h2>4.1.5. <tt class="xref py py-mod docutils literal"><span class="pre">experiment</span></tt> Module<a class="headerlink" href="#module-core.experiment" title="Permalink to this headline">¶</a></h2>
+<span id="experiment-module"></span><h2>3.1.5. <tt class="xref py py-mod docutils literal"><span class="pre">experiment</span></tt> Module<a class="headerlink" href="#module-core.experiment" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="core.experiment.Experiment">
 <em class="property">class </em><tt class="descclassname">core.experiment.</tt><tt class="descname">Experiment</tt><big>(</big><em>params</em><big>)</big><a class="reference internal" href="../_modules/core/experiment.html#Experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.experiment.Experiment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<dl class="method">
-<dt id="core.experiment.Experiment.assign_data_location">
-<tt class="descname">assign_data_location</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/core/experiment.html#Experiment.assign_data_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.experiment.Experiment.assign_data_location" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<p>The experiment class provides a general framework for defining a numerical
+experiment and running it.</p>
+<p>Any experiment should be subclassed from this &#8220;Experiment&#8221; cass. The functions
+to implement are &#8220;_initialize&#8221;, &#8220;_compute&#8221; and &#8220;_visualize&#8221;.</p>
+<p>The class provides methods to save data automatically to a central location.</p>
+<p>By convention a subclass should never modify the parameters passed to it. Use
+self.data.var_name or self.var_name depending on whether the data should be saved
+or not</p>
 <dl class="method">
 <dt id="core.experiment.Experiment.compute">
 <tt class="descname">compute</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/core/experiment.html#Experiment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.experiment.Experiment.compute" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Abstract base for the computation of an experiment</p>
+</dd></dl>
 
-<dl class="staticmethod">
-<dt id="core.experiment.Experiment.lowest_open_space">
-<em class="property">static </em><tt class="descname">lowest_open_space</tt><big>(</big><em>prefix</em>, <em>runs_list</em><big>)</big><a class="reference internal" href="../_modules/core/experiment.html#Experiment.lowest_open_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.experiment.Experiment.lowest_open_space" title="Permalink to this definition">¶</a></dt>
+<dl class="method">
+<dt id="core.experiment.Experiment.load">
+<tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#core.experiment.Experiment.load" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="core.experiment.Experiment.save">
 <tt class="descname">save</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/core/experiment.html#Experiment.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.experiment.Experiment.save" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Save the data and the parameters</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.experiment.Experiment.visualize">
 <tt class="descname">visualize</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/core/experiment.html#Experiment.visualize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.experiment.Experiment.visualize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Abstract base for the visualization of an experiment</p>
+</dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="core.experiment.ExperimentTester">
+<em class="property">class </em><tt class="descclassname">core.experiment.</tt><tt class="descname">ExperimentTester</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#core.experiment.ExperimentTester" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#core.experiment.Experiment" title="core.experiment.Experiment"><tt class="xref py py-class docutils literal"><span class="pre">core.experiment.Experiment</span></tt></a></p>
 </dd></dl>
 
 <dl class="function">
@@ -157,8 +191,13 @@
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="core.experiment.test_lowest_open_space">
-<tt class="descclassname">core.experiment.</tt><tt class="descname">test_lowest_open_space</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/core/experiment.html#test_lowest_open_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#core.experiment.test_lowest_open_space" title="Permalink to this definition">¶</a></dt>
+<dt id="core.experiment.test_experiment">
+<tt class="descclassname">core.experiment.</tt><tt class="descname">test_experiment</tt><big>(</big><big>)</big><a class="headerlink" href="#core.experiment.test_experiment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.experiment.test_experiment_save">
+<tt class="descclassname">core.experiment.</tt><tt class="descname">test_experiment_save</tt><big>(</big><big>)</big><a class="headerlink" href="#core.experiment.test_experiment_save" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -172,22 +211,22 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">4.1. core Package</a><ul>
-<li><a class="reference internal" href="#id1">4.1.1. <tt class="docutils literal"><span class="pre">core</span></tt> Package</a></li>
-<li><a class="reference internal" href="#module-core.constants">4.1.2. <tt class="docutils literal"><span class="pre">constants</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-core.data_controller">4.1.3. <tt class="docutils literal"><span class="pre">data_controller</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-core.debug">4.1.4. <tt class="docutils literal"><span class="pre">debug</span></tt> Module</a></li>
-<li><a class="reference internal" href="#module-core.experiment">4.1.5. <tt class="docutils literal"><span class="pre">experiment</span></tt> Module</a></li>
+<li><a class="reference internal" href="#">3.1. core Package</a><ul>
+<li><a class="reference internal" href="#id1">3.1.1. <tt class="docutils literal"><span class="pre">core</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-core.constants">3.1.2. <tt class="docutils literal"><span class="pre">constants</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-core.data_controller">3.1.3. <tt class="docutils literal"><span class="pre">data_controller</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-core.debug">3.1.4. <tt class="docutils literal"><span class="pre">debug</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-core.experiment">3.1.5. <tt class="docutils literal"><span class="pre">experiment</span></tt> Module</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="modules.html"
-                        title="previous chapter">4. Project Modules</a></p>
+                        title="previous chapter">3. Project Modules</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="diffusive_only.html"
-                        title="next chapter">4.2. diffusive_only Module</a></p>
+  <p class="topless"><a href="experiments.html"
+                        title="next chapter">3.2. experiments Package</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../_sources/modules/core.txt"
@@ -220,13 +259,13 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="diffusive_only.html" title="4.2. diffusive_only Module"
+          <a href="experiments.html" title="3.2. experiments Package"
              >next</a> |</li>
         <li class="right" >
-          <a href="modules.html" title="4. Project Modules"
+          <a href="modules.html" title="3. Project Modules"
              >previous</a> |</li>
         <li><a href="../index.html">viscosaur 0.1 documentation</a> &raquo;</li>
-          <li><a href="modules.html" >4. Project Modules</a> &raquo;</li> 
+          <li><a href="modules.html" >3. Project Modules</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -1,7 +1,7 @@
 from core.data_controller import DataController
 import numpy as np
 from material import wetdiabase
-from diffusive import Diffusive
+from experiments.diffusive import Diffusive
 from core.constants import consts
 
 params = DataController()

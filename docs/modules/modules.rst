@@ -5,8 +5,7 @@ Project Modules
    :maxdepth: 4
 
    core
-   diffusive_only
-   material
+   experiments
+   parameters
+   playground
    run
-   shear_heating
-   sweep

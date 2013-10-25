@@ -229,7 +229,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'viscosaur', u'viscosaur Documentation',
-     u'T. Ben Thompson', 'viscosaur', 'One line description of project.',
+     u'T. Ben Thompson', 'viscosaur', 'Viscoelastic earthquake modelling.',
      'Miscellaneous'),
 ]
 
@@ -241,3 +241,5 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+pngmath_use_preview = True

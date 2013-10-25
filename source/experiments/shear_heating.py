@@ -31,7 +31,6 @@ class ShearHeating(Experiment):
         self.data.initial_temp = (self.params.initial_temp - self.params.low_temp) / self.params.delta_temp
         self.data.stress = self.params.stress / self.data.stress_scale
         self.data.source_term = self.params.source_term * self.data.time_scale / self.params.delta_temp
-        _DEBUG()
 
     def _compute(self):
         self.calc_temp()
@@ -40,7 +39,7 @@ class ShearHeating(Experiment):
     def _arrhenius_power(self, T):
         T_expr = self.params.low_temp + self.params.delta_temp * T
         coefficient = self.material.activation_energy / consts.R
-        return -coefficient * T_expr
+        return -coefficient / T_expr
 
     def calc_temp(self):
         """
@@ -58,7 +57,10 @@ class ShearHeating(Experiment):
             print("Current time step: " + str(t))
             print("Final time: " + str(self.data.t[-1]))
 
-            exp_term = self.data.inv_prandtl * np.exp(self._arrhenius_power(current_temp[1:-1]))
+            exp_term = self.data.inv_prandtl * self.data.eckert * \
+                self.data.stress ** (self.material.stress_exponent + 1) * \
+                np.exp(self._arrhenius_power(current_temp[1:-1]))
+            _DEBUG()
 
             diffusion_term = (current_temp[:-2] - 2 * current_temp[1:-1]
                               + current_temp[2:]) / (self.data.delta_x ** 2)
