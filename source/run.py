@@ -28,8 +28,8 @@ if __name__ == '__main__':
                       help='Load already computed data from a file and do not compute'
                            ' new results')
     options, args = parser.parse_args(sys.argv)
-    print options, args
-    print args[1][-3:]
+    # print options, args
+    # print args[1][-3:]
     if len(args) < 2 or args[1][-3:] != '.py':
         print "Please provide a python file for the parameters."
         print "For example: 'python run.py blahblah_params.py'"

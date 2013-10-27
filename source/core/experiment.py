@@ -3,6 +3,7 @@ import shutil
 import os
 import os.path
 from data_controller import DataController, data_root
+from dolfin import MPI
 
 
 class Experiment(object):
@@ -66,6 +67,8 @@ class Experiment(object):
         that hasn't already been chosen.
         """
         if self.data_loc is not None:
+            return
+        if MPI.process_number() is not 1:
             return
         folder_name = data_root + '/' + self.params.proj_name
         if not os.path.exists(folder_name):

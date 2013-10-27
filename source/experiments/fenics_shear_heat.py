@@ -2,7 +2,7 @@ import dolfin as dfn
 import numpy as np
 # from math import exp
 from matplotlib import pyplot as pyp
-from pdb import set_trace as _DEBUG
+# from pdb import set_trace as _DEBUG
 # import ufl.operators
 from core.experiment import Experiment
 from core.constants import consts
@@ -50,7 +50,7 @@ class ShearHeatingFenics(Experiment):
 
         # Create mesh and define function space
         self.mesh = dfn.RectangleMesh(self.data.x_min, self.data.x_min, self.data.x_max, self.data.x_max, self.params.x_points, self.params.x_points)
-        self.V = dfn.FunctionSpace(self.mesh, 'CG', 2)
+        self.V = dfn.FunctionSpace(self.mesh, 'CG', 1)
         self.ME = self.V * self.V
 
         # Define boundary conditions -- gaussian initial conditions
@@ -80,15 +80,16 @@ class ShearHeatingFenics(Experiment):
     def _compute(self):
         self.solver.parameters["verbose"] = True
         self.solver.parameters["drawplot"] = True
+        self.solver.parameters['output']['statistics'] = False
         # self.solver.parameters["output"]["path"] = "GrayScott"
-        self.solver.parameters["output"]["statistics"] = True
 
         # Supress some FEniCS output
         # dfn.set_log_level(dfn.WARNING)
 
         # Solve the problem
-        self.soln = self.solver.solve()
+        self.data.soln = self.solver.solve()
 
     def _visualize(self):
-        pyp.plot(self.u_.vector().array())
-        pyp.show()
+        pass
+        # pyp.plot(self.u_.vector().array())
+        # pyp.show()

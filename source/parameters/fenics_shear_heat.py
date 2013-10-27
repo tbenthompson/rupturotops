@@ -5,8 +5,8 @@ from core.constants import consts
 
 params = DataController()
 params.material = wetdiabase
-params.delta_t = 0.5 * consts.secs_in_a_year
-params.t_max = 10 * consts.secs_in_a_year
+params.delta_t = 0.1 * consts.secs_in_a_year
+params.t_max = 1 * consts.secs_in_a_year
 params.x_min = -100
 params.x_max = 100
 params.x_points = 101
