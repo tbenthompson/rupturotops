@@ -26,21 +26,21 @@
 
 
 
-    "status": "wontfix", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Simple parallelization", 
+    "summary": "Implement some of core functionality of the gryphon project to get better time-stepping.", 
 
 
 
 
 
 
-    "time": "Mon, 21 Oct 2013 04:00:39 +0000"
+    "time": "Sun, 27 Oct 2013 21:40:04 +0000"
 
 
 

@@ -23,7 +23,7 @@ class LinearProblem:
             i.apply(b)
         self.solver.solve(A, X, b)
 
-class Waves(Experiment):
+class DGWaves(Experiment):
     """
     Solving the wave equation with FEnICS
 
@@ -88,22 +88,6 @@ class Waves(Experiment):
             self.dt_factor * self.v0 * vt * dfn.dx
 
         self.solver = LinearProblem(dfn.lhs(self.form), dfn.rhs(self.form), [], dfn.LUSolver())
-        # J =
-        # self.problem = dfn.NonlinearVariationalProblem(self.form + self.l, self.u, [self.bc],
-            # dfn.derivative(self.form, self.u, self.du))
-        # self.solver = NonlinearVariationalSolver(self.problem)
-        # prm = self.solver.parameters
-        # prm['newton_solver']['absolute_tolerance'] = 1E-8
-        # prm['newton_solver']['relative_tolerance'] = 1E-7
-        # prm['newton_solver']['maximum_iterations'] = 25
-        # prm['newton_solver']['relaxation_parameter'] = 1.0
-        # prm['linear_solver'] = 'lu'
-        # prm['preconditioner'] = 'jacobi'
-        # prm['krylov_solver']['absolute_tolerance'] = 1E-9
-        # prm['krylov_solver']['relative_tolerance'] = 1E-7
-        # prm['krylov_solver']['maximum_iterations'] = 1000
-        # prm['krylov_solver']['gmres']['restart'] = 40
-        # prm['krylov_solver']['preconditioner']['ilu']['fill_level'] = 0
 
     def _compute(self):
         # Supress some FEniCS output
