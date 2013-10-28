@@ -34,7 +34,7 @@ class Waves(Experiment):
     def _initialize(self):
         dfn.parameters["form_compiler"]["cpp_optimize"] = True
         dfn.parameters["form_compiler"]["optimize"] = True
-        d = 2
+        d = 1
         # Create mesh and define function space
 
         if d is 1:
@@ -42,18 +42,19 @@ class Waves(Experiment):
         elif d is 2:
             self.mesh = dfn.RectangleMesh(self.params.x_min, self.params.x_min, self.params.x_max,
                                           self.params.x_max, self.params.x_points, self.params.x_points)
-        self.VS = dfn.FunctionSpace(self.mesh, 'DG', 0) #velocity fnc space
-        self.SS = dfn.VectorFunctionSpace(self.mesh, 'DG', 0) #stress fnc space
+        self.VS = dfn.FunctionSpace(self.mesh, 'CG', 1) #velocity fnc space
+        self.SS = dfn.VectorFunctionSpace(self.mesh, 'CG', 1) #stress fnc space
         self.MS = self.VS * self.SS
 
         class InitCond(dfn.Expression):
             def eval(self, value, x):
-                value[0] = np.exp(- (x[0] * x[0] + x[1] * x[1]) / 50000000.0)
+                value[0] = np.exp(- (x[0] * x[0]) / 1.0)
+                # value[0] = np.exp(- (x[0] * x[0] + x[1] * x[1]) / 50000000.0)
                 value[1] = 0.0
-                value[2] = 0.0
+                # value[2] = 0.0
 
             def value_shape(self):
-                return (3,)
+                return (2,)
 
         # initial_both = dfn.Expression(code2D)
         # self.bc = dfn.DirichletBC(self.MS, dfn.Constant(), lambda x, on_bndry: on_bndry)
@@ -63,7 +64,8 @@ class Waves(Experiment):
         self.u = dfn.TrialFunction(self.MS)
         self.u0 = dfn.Function(self.MS)
         self.v = self.u[0]
-        self.s = dfn.as_vector([self.u[1], self.u[2]]) # current soln
+        # self.s = dfn.as_vector([self.u[1], self.u[2]]) # current soln
+        self.s = dfn.as_vector([self.u[1]]) # current soln
         self.v0, self.s0 = dfn.split(self.u0)  # previous soln
 
         init = InitCond()
