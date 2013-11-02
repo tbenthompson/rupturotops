@@ -2,8 +2,10 @@ import datetime
 import shutil
 import os
 import os.path
-from data_controller import DataController, data_root
 from dolfin import MPI
+from core.data_controller import DataController, data_root
+from core.debug import _DEBUG
+assert(_DEBUG)
 
 
 class Experiment(object):
@@ -22,11 +24,12 @@ class Experiment(object):
     """
     def __init__(self, params):
         self.params = params
-        self.material = params.material
+        if 'material' in params:
+            self.material = params.material
         self.data = DataController()
         self.data_loc = None
-        self._assign_data_location()
 
+        self._assign_data_location()
         self._initialize()
 
     def _initialize(self):
@@ -68,13 +71,15 @@ class Experiment(object):
         """
         if self.data_loc is not None:
             return
-        if MPI.process_number() is not 1:
+        if MPI.process_number() is not 0:
             return
         folder_name = data_root + '/' + self.params.proj_name
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        new_run_folder_name = folder_name + '/' + self.params.run_name + '_' + timestamp
+        new_run_folder_name = folder_name + '/' + \
+            self.params.run_name + \
+            '_' + timestamp
         os.mkdir(new_run_folder_name)
         self.data_loc = new_run_folder_name
 

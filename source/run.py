@@ -12,8 +12,8 @@ from optparse import OptionParser
 
 def main(package_name, load_file):
     setup_debug()
-    _temp = __import__(package_name, globals(), locals(), fromlist=['experiment'])
-    experiment = _temp.experiment
+    _temp = __import__(package_name, globals(), locals(), fromlist=['experiment, params'])
+    experiment = _temp.experiment(_temp.params)
     if load_file is not None:
         experiment.load(load_file)
         experiment.visualize()

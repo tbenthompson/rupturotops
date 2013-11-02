@@ -1,5 +1,5 @@
 from core.data_controller import DataController
-from experiments.waves import Waves
+from experiments.fenics.fenics_waves import Waves
 from parameters.material import wetdiabase
 from core.constants import consts
 from math import sqrt
@@ -18,5 +18,6 @@ c = sqrt(params.material.shear_modulus / params.material.density)
 params.delta_t = 0.1 * delta_x / c
 print "Delta_t: " + str(params.delta_t)
 params.proj_name = 'fenics'
-params.run_name = 'wave'
-experiment = Waves(params)
+params.run_name = 'wave_not_dg'
+
+experiment = Waves

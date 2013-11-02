@@ -1,14 +1,6 @@
 import os
 import os.path
 import cPickle
-# I wrote this before this current design:
-# To be designed as follows:
-#   functions receive an object with the relevant parameters
-#   parameter categories are defined in other python files
-#   the output values are saved in a specific location
-#   the run is given a specific name
-#   then, the data is saved in the relevant folder for that name
-#   allow options for a name prefix and then the lowest number not taken
 
 data_root = '/home/tbent/projects/viscosaur/data'
 
@@ -129,7 +121,7 @@ def test_data_load():
 
 
 def test_real_parameters():
-    from material import wetdiabase
+    from parameters.material import wetdiabase
     wetdiabase.save(test_file)
     new = DataController.load(test_file)
     assert(new.activation_energy == wetdiabase.activation_energy)

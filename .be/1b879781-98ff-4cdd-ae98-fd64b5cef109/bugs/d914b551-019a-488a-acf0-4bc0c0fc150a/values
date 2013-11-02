@@ -26,21 +26,21 @@
 
 
 
-    "status": "wontfix", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Implement some of core functionality of the gryphon project to get better time-stepping.", 
+    "summary": "Migrate the FVM code to the experiment setup", 
 
 
 
 
 
 
-    "time": "Sun, 27 Oct 2013 21:40:04 +0000"
+    "time": "Sat, 02 Nov 2013 22:11:58 +0000"
 
 
 

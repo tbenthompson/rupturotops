@@ -21,4 +21,4 @@ params.init_temp = 350.0 + 273.0  # initial temperature
 params.delta_t = 2.5  # total increase in temperature for an event
 params.stress = 100.0e6  # MPa
 
-experiment = Diffusive(params)
+experiment = Diffusive

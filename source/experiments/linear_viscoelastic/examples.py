@@ -1,15 +1,15 @@
 import numpy as np
 from math import pi
 import matplotlib.pyplot as pyp
+assert(pyp)
 from pdb import set_trace as _DEBUG
+assert(_DEBUG)
 
 import utilities
 import full_viscoelastic
 
 def standard_params(slip):
     x = np.arange(0.05, 10.0, 0.05)
-    as
-    ARAn
     t = np.arange(0.0, 5.0)
     alpha = 0.0
     u_t = map(lambda t_in: full_viscoelastic.solution(slip, x, t_in, alpha), t)

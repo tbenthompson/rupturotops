@@ -6,12 +6,13 @@ from matplotlib import pyplot as pyp
 # import ufl.operators
 from core.experiment import Experiment
 from core.constants import consts
-from gryphon.gryphon import ESDIRK
 
 
 class ShearHeatingFenics(Experiment):
     """
-    Solving the shear heating equations with FEnICS
+    Solving the shear heating equations with FEnICS.
+    This is entirely playcode. Don't use it without
+    serious refactoring and testing.
     """
     def _initialize(self):
         # This nondimensionalization code is replicated from shear_heating.py and should
@@ -71,10 +72,11 @@ class ShearHeatingFenics(Experiment):
             self.v2 * dfn.dx
 
         T = [0, self.data.t_max]
-        self.solver = ESDIRK(T, W, [self.temp_RHS, self.shear_heat_RHS], bcs=[self.bc])
-        self.solver.is_linear = False
-        self.solver.parameters['timestepping']['dt'] = self.data.delta_t
-        self.solver.parameters["timestepping"]["absolute_tolerance"] = 1e-7
+        # To  make this work, reimplement the time stepping in the compute section below
+        # self.solver = ESDIRK(T, W, [self.temp_RHS, self.shear_heat_RHS], bcs=[self.bc])
+        # self.solver.is_linear = False
+        # self.solver.parameters['timestepping']['dt'] = self.data.delta_t
+        # self.solver.parameters["timestepping"]["absolute_tolerance"] = 1e-7
 
 
     def _compute(self):

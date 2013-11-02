@@ -26,21 +26,21 @@
 
 
 
-    "status": "wontfix", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Implement some of core functionality of the gryphon project to get better time-stepping.", 
+    "summary": "Investigate Spectral Methods a lot more", 
 
 
 
 
 
 
-    "time": "Sun, 27 Oct 2013 21:40:04 +0000"
+    "time": "Thu, 31 Oct 2013 10:42:15 +0000"
 
 
 

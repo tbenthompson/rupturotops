@@ -1,5 +1,5 @@
 from core.data_controller import DataController
-from experiments.fenics_shear_heat import ShearHeatingFenics
+from experiments.fenics.fenics_shear_heat import ShearHeatingFenics
 from parameters.material import wetdiabase
 from core.constants import consts
 
@@ -24,4 +24,5 @@ params.source_term = params.source_friction_coeff * \
     params.plate_rate / \
     (params.material.specific_heat * params.material.density * 1)
 print params.source_term
-experiment = ShearHeatingFenics(params)
+
+experiment = ShearHeatingFenics

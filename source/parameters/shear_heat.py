@@ -33,4 +33,4 @@ params.plot_temp_time = True
 params.plot_strain_time = False
 params.plot_every = 10  # time steps
 
-experiment = ShearHeating(params)
+experiment = ShearHeating
