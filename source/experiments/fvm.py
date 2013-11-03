@@ -1,199 +1,211 @@
 import numpy as np
 from matplotlib import pyplot as pyp
-import time
+from core.experiment import Experiment
 from core.debug import _DEBUG
-from numba import autojit
-# import scipy.io
-from weno import WENO
+from core.update_plotter import UpdatePlotter
+from core.error_tracker import ErrorTracker
+assert(_DEBUG)
+from experiments.weno import WENO
+import experiments.wave_forms as wave_forms
+import experiments.ssprk4 as ssprk4
 
+#All the static methods probably should be moved to their
+#own classes to enforce some separation of responsibilities
+#delta_t calculation, grid calculation go in meshing class
+#separate boundary conditions
 
-class FVM(object):
+class FVM(Experiment):
+    def _initialize(self):
+        self.t_max = 1.0
+        self.temp_analytical = wave_forms.square
+        self.v = 1.0
+        if 'plotter' not in self.params:
+            self.params.plotter = None
+        if 'error_tracker' not in self.params:
+            #Default to using the same parameters as the main plotter
+            self.params.error_tracker = DataController(plotter=
+                                                       self.params.plotter)
+        if 't_max' in self.params:
+            self.t_max = self.params.t_max
+        if 'analytical' in self.params:
+            self.temp_analytical = self.params.analytical
 
-    def __init__(self, which_init):
-        self.x_elements = 300
-        self.x_min = 0.0
-        self.x_max = 5.0
-        self.delta_x = (self.x_max - self.x_min) / (self.x_elements - 1)
-        self.delta_t = 1.5 * self.delta_x
-        courant = self.delta_t / self.delta_x
-        print('Courant number: ' + str(courant))
-        # periods = 2.0
-        # t_max = 4.0 * periods
-        self.t_max = 30.0
-        self.plot = True
-        self.always_plot = True
-        self.plot_interval = 5.0
-        self.x = np.linspace(self.x_min, self.x_max, self.x_elements)
-        self.v = -np.pad(np.ones_like(self.x), 2, 'edge')
-        if which_init is 'square':
-            self.analytical = lambda t: np.where(
-                np.logical_and(self.x < (1.0 + t), self.x > (0.5 + t)),
-                np.ones_like(self.x), np.zeros_like(self.x))
-        elif which_init is 'smooth':
-            self.gaussian_width = 5
-            self.analytical = lambda t: np.exp(-(self.x - t - 1.0) ** 2 * self.gaussian_width)
-        elif which_init is 'step':
-            self.analytical = lambda t: np.where(
-                self.x < (1.0 + t), np.ones_like(self.x), np.zeros_like(self.x))
-        elif which_init is 'jumpy':
-            self.analytical = lambda t: np.sin(10 * (self.x - t)) ** 4
+        self.delta_x = self.params.delta_x
+        self.domain_width = np.sum(self.delta_x)
+        self.x = FVM.positions_from_spacing(self.delta_x)
+        self.delta_t = FVM.calc_time_step(self.delta_x)
+
+        self.params.delta_t = self.delta_t
+
+        self.analytical = lambda t: self.temp_analytical(
+            (self.x - t) % self.domain_width)
+        self.v = np.pad(np.ones_like(self.x), 2, 'edge')
         self.init = self.analytical(0.0)
         self.exact = self.analytical(self.t_max)
-        # self.limit_fnc = self.superbee
-        # self.flux_fnc = self.flux_limited
-        # self.time_int = RK()
-        self.addme = []
 
-    # def superbee(self, t, r):
-    #     return np.maximum(np.maximum(np.zeros_like(r), np.minimum(2.0 * r, 1.0)), np.minimum(r, 2.0))
+        self.flux_control = WENO()
 
-    # def centered_sch(self, delta_t, t, now, dir):
-    #     return dir * np.roll(now, 0)
+    @staticmethod
+    def positions_from_spacing(spacings):
+        """
+        Sum the spacings to get cell centers,
+        but the cell center is at the halfway point, so we have to
+        subtract half of delta_x again.
+        """
+        x = np.cumsum(spacings)
+        x = x - spacings / 2.0
+        return x
 
-    # def upwind_sch(self, delta_t, t, now, dir):
-    #     return now
+    @staticmethod
+    def calc_time_step(delta_x):
+        return ssprk4.cfl_max * 0.9 * delta_x
 
-    # def lax_wendroff_sch(self, delta_t, t, now, dir):
-    #     flux = self.centered_sch(delta_t, t, now, dir) - self.v * \
-    #         ((delta_t) / (2 * self.delta_x)) * \
-    #         (1 * dir * now)
-    #     return flux
-
-    # def flux_limited(self, delta_t, t, now, dir):
-    #     mesh_grad = now - np.roll(now, 1)
-    #     r = np.nan_to_num(mesh_grad / np.roll(mesh_grad, -dir))
-    #     limiter = self.limit_fnc(t, r)
-    #     _DEBUG()
-    #     upwind = self.upwind_sch(delta_t, t, now, dir)
-    #     lax = self.lax_wendroff_sch(delta_t, t, now, dir)
-    #     return upwind + np.roll(limiter, -dir) * (lax - upwind)
-
-    def boundary_cond(self, t, ghosts):
-        ghosts[0] = ghosts[-3]
-        ghosts[1] = ghosts[-4]  # np.sin(30 * t)
-        ghosts[-2] = ghosts[3]
-        ghosts[-1] = ghosts[2]
+    @staticmethod
+    def boundary_cond(t, now):
+        ghosts = np.pad(now, 2, 'constant')
+        ghosts[0] = ghosts[-4]
+        ghosts[1] = ghosts[-3]  # np.sin(30 * t)
+        ghosts[-2] = ghosts[2]
+        ghosts[-1] = ghosts[3]
         return ghosts
 
-    def split_velocity(self, v):
-        m = np.max(np.abs(v))
-        # leftwards = 0.5 * (v + m)
-        # rightwards = np.roll(-0.5 * (v - m), 1)
-        leftwards = np.where(v > 0, v, 0)
-        rightwards = np.roll(-np.where(v < 0, v, 0), 1)
-        return leftwards, rightwards
+    @staticmethod
+    def split_velocity(v):
+        rightwards = np.where(v > 0, v, 0)
+        leftwards = np.roll(-np.where(v < 0, v, 0), -1)
+        return rightwards, leftwards
 
-    @autojit()
-    def spatial_deriv(self, delta_t, t, now):
-        now = self.boundary_cond(t, now)
-        leftwards_v, rightwards_v = self.split_velocity(self.v)
-        left_flux = leftwards_v * self.flux_fnc(delta_t, t, now, -1)
-        right_flux = rightwards_v * self.flux_fnc(delta_t, t, now, 1)
-        total_left_flux = -(left_flux - np.roll(right_flux, 1))
-        derivative = (total_left_flux - np.roll(total_left_flux, -1)) / self.delta_x
-        return derivative
+    # @autojit()
+    def spatial_deriv(self, t, now):
+        now = FVM.boundary_cond(t, now)
 
-    def _compute(self, ax, sym):
-        ax.plot(self.x, self.init)
-        p1, = ax.plot(self.x, self.init, sym)
-        error_fig = pyp.figure()
-        error_fig = error_fig.add_subplot(111)
-        pyp.show(block=False)
+        rightwards_v, leftwards_v = FVM.split_velocity(self.v)
+        left_edge_u = leftwards_v * self.flux_control.compute(now, -1)
+        right_edge_u = rightwards_v * self.flux_control.compute(now, 1)
+        # Because we are solving a Riemann problem, the zeroth
+        # order contribution to the flux should be the difference
+        # in the left and right values at a boundary
+        # outflow comes from the right side and inflow from the left
+        left_side_of_left_bnd = np.roll(right_edge_u, 1)
+        right_side_of_left_bnd = left_edge_u
+        total_left_flux = -(right_side_of_left_bnd - left_side_of_left_bnd)
+        # The total flux should be the flux coming in from the right
+        # minus the flux going out the left.
+        in_from_right = total_left_flux
+        out_to_the_left = np.roll(total_left_flux, -1)
+        total_flux = in_from_right - out_to_the_left
+        return total_flux[2:-2] / self.delta_x
 
-        result = np.pad(self.init.copy(), 2, 'constant')
-        self.t = self.delta_t
-        # self.time_int.setup(self.spatial_deriv)
-        diff_old = result
-        diff = result
-        p_error, = error_fig.plot(diff_old)
-        while self.t <= self.t_max:
-            f = lambda adt, x: self.spatial_deriv(adt * self.delta_t, self.t, x)
-            dt = self.delta_t
-            t1 = result + 0.391752226571890 * dt * f(0.391752226571890, result)
-            t2 = 0.444370493651235 * result + \
-                0.555629506348765 * t1 + \
-                0.368410593050371 * dt * f(0.368410593050371, t1)
-            t3 = 0.620101851488403 * result + \
-                0.379898148511597 * t2 + \
-                0.251891774271694 * dt * f(0.251891774271694, t2)
-            t4 = 0.178079954393132 * result + \
-                0.821920045606868 * t3 + \
-                0.544974750228521 * dt * f(0.544974750228521, t3)
-            result = 0.517231671970585 * t2 + \
-                0.096059710526147 * t3 + \
-                0.063692468666290 * dt * f(0.063692468666290, t3) + \
-                0.386708617503269 * t4 + \
-                0.226007483236906 * dt * f(0.226007483236906, t4)
-            # temp1 = result + self.delta_t * self.spatial_deriv(self.delta_t, self.t, result)
-            # temp2 = 0.75 * result + \
-            #     0.25 * temp1 + \
-            #     0.25 * self.delta_t * self.spatial_deriv(0.25 * self.delta_t, self.t, temp1)
-            # result = (1.0 / 3.0) * result + \
-            #           (2.0 / 3.0) * temp2 + \
-            #           (2.0 / 3.0) * self.delta_t * self.spatial_deriv((2.0 / 3.0) * self.delta_t, self.t, temp2)
-            # result = result + dt * f(result)
-            do_we_plot = self.t / self.plot_interval
-            self.t += self.delta_t
-            exact = self.analytical(self.t)
-            diff = result[2:-2] - exact
-            error = np.sum(diff ** 2) / len(exact)
-            time.sleep(0.1)
-            # if error >= 0.035241257075:
-            # # if error >= 0.00035241257075:
-            #     p1.set_ydata(result)
-            #     pyp.draw()
-            #     pyp.figure()
-            #     pyp.plot(self.x, diff)
-            #     pyp.plot(self.x, diff_old)
-            #     pyp.show()
-            #     _DEBUG(5)
-            p_error.set_ydata(diff)
-            pyp.draw()
-            diff_old = diff
-            print error
-            if (not self.always_plot) and \
-                    abs(do_we_plot - round(do_we_plot)) > (self.delta_t / self.plot_interval):
-                continue
-            if self.plot:
-                print self.t
-                p1.set_ydata(result[2:-2])
-                pyp.draw()
-        ax.plot(self.x, result, 'o')
-        ax.plot(self.x, self.exact)
-        # return deriv
+    def _compute(self):
+        result = self.init.copy()
+        dt = np.min(self.delta_t)
+        t = dt
 
-# def test_varying_grid():
-#     test_case = 'jumpy'
-#     grid1 = np.linspace(-5, 5, 100)
-#     fvm1 = FVM(test_case, grid1)
-#     delta_x = np.ones(100) * 0.1
-#     grid2 = np.cumsum(delta_x)
-#     fvm2 = FVM(test_case, grid2)
+        error_tracker = ErrorTracker(self.x, result,
+                                     self.analytical, dt,
+                                     self.params.error_tracker)
+        self.params.plotter.x_bounds = [np.min(self.x), np.max(self.x)]
+        self.params.plotter.y_bounds = [np.min(result), np.max(result)]
+        soln_plot = UpdatePlotter(dt, self.params.plotter)
 
+        soln_plot.add_line(self.x, result, '+')
+        soln_plot.add_line(self.x, self.init, '-')
 
-if __name__ == "__main__":
-    setup_debug()
-    fig = pyp.figure()
-    fvm = FVM('jumpy')
-    ax = fig.add_subplot(111)
-    ax.axis((0, fvm.x_max, -1.5, 1.5))
-    fvm.flux_fnc = WENO().compute
-    retval1 = fvm._compute(ax, '.')
-    pyp.show()
+        while t <= self.t_max:
+            result = ssprk4.ssprk4(self.spatial_deriv, result, t, dt)
+            t += dt
+            error_tracker.update(result, t)
+            soln_plot.update(result, t)
 
+        soln_plot.update(result, 0)
+        soln_plot.add_line(self.x, self.exact)
+        return result
 
+#-----------------------------------------------------------------------------
+# TESTS
+#-----------------------------------------------------------------------------
+from core.data_controller import DataController
+interactive_test = True
 
+def test_init_cond():
+    params = DataController()
+    params.delta_x = 0.1 * np.ones(50)
+    params.analytical = wave_forms.square
+    fvm = FVM(params)
+    assert(fvm.init[0] == 0.0)
+    assert(fvm.init[-1] == 0.0)
 
+def test_split_vel():
+    v = np.array([1, -1, 1])
+    right, left = FVM.split_velocity(v)
+    assert((left == [1, 0, 0]).all())
+    assert((right == [1, 0, 1]).all())
 
+def test_time_step():
+    delta_x = 1.0
+    assert(FVM.calc_time_step(delta_x) <= ssprk4.cfl_max)
 
-    # # fig2 = pyp.figure()
-    # fvm.flux_fnc = fvm.flux_limited
-    # retval2 = fvm._compute(ax, '+')
-    # # fvm.flux_fnc = fvm.upwind_sch
-    # # retval2 = fvm._compute(ax, 'x')
-    # # fvm.flux_fnc = fvm.centered_sch
-    # # retval2 = fvm._compute(ax, '+')
-    # fvm.flux_fnc = fvm.lax_wendroff_sch
-    # retval3 = fvm._compute(ax, 'o')
-    # # pyp.show()
-    # # pyp.plot(retval1 - retval3)
+def test_mesh_initialize():
+    params = DataController()
+    params.delta_x = np.array([0.5, 1.0, 0.1, 2.0])
+    fvm = FVM(params)
+    correct = np.array([0.25, 1.0, 1.55, 2.6])
+    assert(fvm.domain_width == 3.6)
+    assert(len(fvm.x) == 4)
+    assert((fvm.x == correct).all())
+    assert((np.min(fvm.delta_t) <= 0.1 * ssprk4.cfl_max))
+
+def test_fvm_flux_compute():
+    params = DataController()
+    params.delta_x = 0.1 * np.ones(50)
+    params.analytical = wave_forms.square
+    fvm = FVM(params)
+    deriv = fvm.spatial_deriv(0, fvm.init)
+    assert(np.sum(deriv) <= 0.005)
+    for i in range(0, len(deriv)):
+        if i == 5:
+            np.testing.assert_almost_equal(deriv[5], -10.0)
+            continue
+        if i == 10:
+            np.testing.assert_almost_equal(deriv[10], 10.0)
+            continue
+        np.testing.assert_almost_equal(deriv[i], 0.0)
+
+def test_circular_boundary_conditions():
+    params = DataController()
+    params.delta_x = 0.1 * np.ones(50)
+    params.analytical = lambda x: x
+    fvm = FVM(params)
+    added_ghosts = fvm.boundary_cond(0, fvm.init)
+    np.testing.assert_almost_equal(added_ghosts[0], 4.85)
+    np.testing.assert_almost_equal(added_ghosts[1], 4.95)
+    np.testing.assert_almost_equal(added_ghosts[-2], 0.05)
+    np.testing.assert_almost_equal(added_ghosts[-1], 0.15)
+    np.testing.assert_almost_equal(fvm.analytical(5.0), fvm.analytical(0.0))
+
+def test_fvm_boundaries():
+    _test_fvm_helper(wave_forms.square, 6.0)
+
+def test_fvm_simple():
+    _test_fvm_helper(wave_forms.sin_wave, 1.0)
+
+def _test_fvm_helper(wave, t_max):
+    #Simple test to make sure the code works right
+    my_params = DataController()
+    my_params.delta_x = 0.01 * np.ones(100)
+    my_params.plotter = DataController()
+    my_params.plotter.always_plot = False
+    my_params.plotter.plot_interval = 0.5
+    my_params.t_max = t_max
+    my_params.analytical = wave
+    fvm = FVM(my_params)
+    initial = np.pad(fvm.init, 1, 'constant')
+    #check essentially non-oscillatoriness
+    #total variation <= initial_tv + O(h^2)
+    tv = np.sum(abs(initial - np.roll(initial, 1)))
+    result = np.pad(fvm.compute(), 1, 'constant')
+    result_tv = np.sum(abs(result - np.roll(result, 1)))
+    print result_tv - tv
+    assert(result_tv < tv + 0.005)
+    if interactive_test is True:
+        pyp.show()

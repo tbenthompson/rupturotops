@@ -1,1 +1,1 @@
-find ./ -name "*.py" |xargs py.test
+find ./ -name "*.py" |xargs py.test -vs

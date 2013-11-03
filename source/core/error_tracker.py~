@@ -1,0 +1,8 @@
+from core.update_plotter import UpdatePlotter
+class ErrorTracker(object):
+    def __init__(self, x, init, params):
+        self.plot = UpdatePlotter(params)
+        self.diff_old = init
+        error_plot.add_line(self.x, diff_old, '*')
+
+    def update(self, y, t):

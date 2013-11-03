@@ -26,21 +26,21 @@
 
 
 
-    "status": "fixed", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Test Finite Volume Code", 
+    "summary": "Grab the 4th order linear optimal runge kutta from the gottlieb paper", 
 
 
 
 
 
 
-    "time": "Sat, 02 Nov 2013 22:11:13 +0000"
+    "time": "Sun, 03 Nov 2013 09:02:37 +0000"
 
 
 

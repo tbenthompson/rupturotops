@@ -1,23 +1,23 @@
 import scipy.io
 import matplotlib.pyplot as pyp
 from core.debug import _DEBUG
+assert(_DEBUG)
 import numpy as np
 from numba import autojit
+assert(autojit)
 # This should be migrated to use PyWENO and construct a matrix
 # vector product which can be optimized in PETSc
 
 
 class WENO(object):
-
+    """
+    Produces a 5th order WENO reconstruction per Jiang and Shu (1996)
+    """
     def __init__(self):
         self.eps = 1e-6
         self.g = np.array([1.0 / 10.0, 3.0 / 5.0, 3.0 / 10.0])
 
-    def compute(self, a, b, now, direc):
-        return self._compute(now, direc)
-
-    #@autojit()
-    def _compute(self, now, direc):
+    def compute(self, now, direc):
         #these variables represent the left-two, left-one, central,
         #right and right-two average cell values. where left and
         #right are flipped if we're looking at a left boundary
@@ -104,7 +104,7 @@ def _test_weno_helper(y, filename):
     betas = weno.get_beta(l2, l, c, r, r2)
 
     wts = weno.get_weights(betas)
-    flux = weno._compute(y, direc)
+    flux = weno.compute(y, direc)
     dx = -(flux - np.roll(flux, -1))
 
     comp = scipy.io.loadmat(filename)

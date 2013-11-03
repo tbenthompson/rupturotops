@@ -14,13 +14,15 @@ def main(package_name, load_file):
     setup_debug()
     _temp = __import__(package_name, globals(), locals(), fromlist=['experiment, params'])
     experiment = _temp.experiment(_temp.params)
-    if load_file is not None:
-        experiment.load(load_file)
-        experiment.visualize()
-        return
+    # Figure out how to reload data and view it...
+    # if load_file is not None:
+    #     experiment.load(load_file)
+    #     experiment.visualize()
+    #     return
     experiment.compute()
     experiment.visualize()
     experiment.save()
+    return experiment
 
 if __name__ == '__main__':
     parser = OptionParser()

@@ -9,6 +9,7 @@ assert(_DEBUG)
 
 
 class Experiment(object):
+
     """
     The experiment class provides a general framework for defining a numerical
     experiment and running it.
@@ -22,10 +23,18 @@ class Experiment(object):
     self.data.var_name or self.var_name depending on whether the data should be saved
     or not
     """
-    def __init__(self, params):
-        self.params = params
+
+    def __init__(self, params=DataController()):
+        self.proj_name = 'test'
+        self.run_name = 'test'
+        if 'proj_name' in params:
+            self.proj_name = params.proj_name
+        if 'run_name' in params:
+            self.run_name = params.run_name
         if 'material' in params:
             self.material = params.material
+
+        self.params = params
         self.data = DataController()
         self.data_loc = None
 
@@ -73,24 +82,25 @@ class Experiment(object):
             return
         if MPI.process_number() is not 0:
             return
-        folder_name = data_root + '/' + self.params.proj_name
+        folder_name = data_root + '/' + self.proj_name
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         new_run_folder_name = folder_name + '/' + \
-            self.params.run_name + \
+            self.run_name + \
             '_' + timestamp
-        os.mkdir(new_run_folder_name)
+        # We intentionally ignore the case where the folder already exists.
+        # This means data may be overwritten, but it is the user's resp
+        # to make sure this doesn't happen.
+        if not os.path.exists(new_run_folder_name):
+            os.mkdir(new_run_folder_name)
         self.data_loc = new_run_folder_name
 
-##############################################################################
+# ----------------------------------------------------------------------------
 # TESTS BELOW HERE
-##############################################################################
-
-test_params = DataController(bar=1, proj_name='test', run_name='test')
-
-
+# ----------------------------------------------------------------------------
 class ExperimentTester(Experiment):
+
     def _initialize(self):
         pass
 
@@ -102,7 +112,7 @@ class ExperimentTester(Experiment):
 
 
 def test_experiment():
-    foo = ExperimentTester(test_params)
+    foo = ExperimentTester(DataController(bar = 1))
     assert foo.params.bar == 1
     foo.compute()
     assert foo.data.abc == 1
@@ -112,7 +122,7 @@ def test_experiment():
 
 
 def test_experiment_save():
-    foo = ExperimentTester(test_params)
+    foo = ExperimentTester()
     foo.compute()
     foo.visualize()
     foo.save()
@@ -125,7 +135,7 @@ def test_experiment_save():
 
 
 def test_assign_data_location():
-    e = ExperimentTester(test_params)
+    e = ExperimentTester()
     e._assign_data_location()
     root_loc = e.data_loc
     dir_exists = os.path.exists(root_loc)
