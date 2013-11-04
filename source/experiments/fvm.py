@@ -5,9 +5,10 @@ from core.debug import _DEBUG
 from core.update_plotter import UpdatePlotter
 from core.error_tracker import ErrorTracker
 assert(_DEBUG)
-from experiments.weno import WENO
+from experiments.weno import WENO, WENO_NEW
 import experiments.wave_forms as wave_forms
 import experiments.ssprk4 as ssprk4
+from experiments.riemann_solver import RiemannSolver
 
 #All the static methods probably should be moved to their
 #own classes to enforce some separation of responsibilities
@@ -43,7 +44,8 @@ class FVM(Experiment):
         self.init = self.analytical(0.0)
         self.exact = self.analytical(self.t_max)
 
-        self.flux_control = WENO()
+        self.riemann = RiemannSolver()
+        self.reconstructor = WENO_NEW(5)
 
     @staticmethod
     def positions_from_spacing(spacings):
@@ -69,31 +71,19 @@ class FVM(Experiment):
         ghosts[-1] = ghosts[3]
         return ghosts
 
-    @staticmethod
-    def split_velocity(v):
-        rightwards = np.where(v > 0, v, 0)
-        leftwards = np.roll(-np.where(v < 0, v, 0), -1)
-        return rightwards, leftwards
-
     # @autojit()
     def spatial_deriv(self, t, now):
         now = FVM.boundary_cond(t, now)
+        recon_left = self.reconstructor.compute(now, 1)
+        recon_right = self.reconstructor.compute(now, -1)
 
-        rightwards_v, leftwards_v = FVM.split_velocity(self.v)
-        left_edge_u = leftwards_v * self.flux_control.compute(now, -1)
-        right_edge_u = rightwards_v * self.flux_control.compute(now, 1)
-        # Because we are solving a Riemann problem, the zeroth
-        # order contribution to the flux should be the difference
-        # in the left and right values at a boundary
-        # outflow comes from the right side and inflow from the left
-        left_side_of_left_bnd = np.roll(right_edge_u, 1)
-        right_side_of_left_bnd = left_edge_u
-        total_left_flux = -(right_side_of_left_bnd - left_side_of_left_bnd)
+        rightwards_flux = self.riemann.compute(recon_left,
+                                               recon_right,
+                                               self.v)
         # The total flux should be the flux coming in from the right
         # minus the flux going out the left.
-        in_from_right = total_left_flux
-        out_to_the_left = np.roll(total_left_flux, -1)
-        total_flux = in_from_right - out_to_the_left
+        leftwards_flux = -np.roll(rightwards_flux, -1)
+        total_flux = rightwards_flux + leftwards_flux
         return total_flux[2:-2] / self.delta_x
 
     def _compute(self):
@@ -101,7 +91,7 @@ class FVM(Experiment):
         dt = np.min(self.delta_t)
         t = dt
 
-        error_tracker = ErrorTracker(self.x, result,
+        self.error_tracker = ErrorTracker(self.x, result,
                                      self.analytical, dt,
                                      self.params.error_tracker)
         self.params.plotter.x_bounds = [np.min(self.x), np.max(self.x)]
@@ -114,18 +104,27 @@ class FVM(Experiment):
         while t <= self.t_max:
             result = ssprk4.ssprk4(self.spatial_deriv, result, t, dt)
             t += dt
-            error_tracker.update(result, t)
+            self.error_tracker.update(result, t)
             soln_plot.update(result, t)
 
         soln_plot.update(result, 0)
         soln_plot.add_line(self.x, self.exact)
         return result
 
-#-----------------------------------------------------------------------------
+    @staticmethod
+    def total_variation(a):
+        #add a zero padding
+        return np.sum(abs(a - np.roll(a, 1)))
+
+#----------------------------------------------------------------------------
 # TESTS
-#-----------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 from core.data_controller import DataController
-interactive_test = True
+interactive_test = False
+
+def test_total_variaton():
+    a = [1, 0, 1, 1, 1]
+    assert(FVM.total_variation(a) == 2.0)
 
 def test_init_cond():
     params = DataController()
@@ -134,12 +133,6 @@ def test_init_cond():
     fvm = FVM(params)
     assert(fvm.init[0] == 0.0)
     assert(fvm.init[-1] == 0.0)
-
-def test_split_vel():
-    v = np.array([1, -1, 1])
-    right, left = FVM.split_velocity(v)
-    assert((left == [1, 0, 0]).all())
-    assert((right == [1, 0, 1]).all())
 
 def test_time_step():
     delta_x = 1.0
@@ -184,28 +177,33 @@ def test_circular_boundary_conditions():
     np.testing.assert_almost_equal(fvm.analytical(5.0), fvm.analytical(0.0))
 
 def test_fvm_boundaries():
-    _test_fvm_helper(wave_forms.square, 6.0)
+    delta_x = 0.1 * np.ones(50)
+    _test_fvm_helper(wave_forms.square, 6.0, delta_x, 0.1)
 
 def test_fvm_simple():
-    _test_fvm_helper(wave_forms.sin_wave, 1.0)
+    delta_x = 0.005 * np.ones(1000)
+    _test_fvm_helper(wave_forms.sin_wave, 1.0, delta_x, 0.05)
 
-def _test_fvm_helper(wave, t_max):
+def _test_fvm_helper(wave, t_max, delta_x, error_bound):
     #Simple test to make sure the code works right
     my_params = DataController()
-    my_params.delta_x = 0.01 * np.ones(100)
+    my_params.delta_x = delta_x
     my_params.plotter = DataController()
     my_params.plotter.always_plot = False
     my_params.plotter.plot_interval = 0.5
     my_params.t_max = t_max
     my_params.analytical = wave
     fvm = FVM(my_params)
-    initial = np.pad(fvm.init, 1, 'constant')
+    result = fvm.compute()
+
     #check essentially non-oscillatoriness
     #total variation <= initial_tv + O(h^2)
-    tv = np.sum(abs(initial - np.roll(initial, 1)))
-    result = np.pad(fvm.compute(), 1, 'constant')
-    result_tv = np.sum(abs(result - np.roll(result, 1)))
-    print result_tv - tv
-    assert(result_tv < tv + 0.005)
+    init_tv = FVM.total_variation(fvm.init)
+    result_tv = FVM.total_variation(result)
+    assert(result_tv < init_tv + error_bound)
+
+    #check error
+    assert(fvm.error_tracker.error[-1] < error_bound)
+
     if interactive_test is True:
         pyp.show()

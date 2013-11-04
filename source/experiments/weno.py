@@ -66,24 +66,75 @@ class WENO(object):
         return weights
         # pyp.plot(weight1)
 
+import pyweno.weno
+class WENO_NEW(object):
+    def __init__(self, order=5):
+        self.order = order
+        self.half_width = int((self.order + 1) / 2.0)
+
+    def compute(self, now, direc):
+        if direc == 1:
+            direc = 'left'
+        else:
+            direc = 'right'
+        padded = np.pad(now, self.half_width, 'constant')
+        retval = pyweno.weno.reconstruct(padded, self.order, direc)
+        return retval[self.half_width:-self.half_width]
+
+
+
 
 ##############################################################################
 # TESTS BELOW HERE
 ##############################################################################
 
 from core.data_controller import data_root
+interactive_test = False
+
+def test_higher_order_weno():
+    w = WENO_NEW(11)
+    assert(w.order == 11)
+    assert(w.half_width == 6)
+    assert(type(w.half_width) == int)
+
+def test_compare_wenos():
+    x = np.linspace(-5, 5, 100)
+    y = np.where(x <= 0.0, np.ones_like(x), np.zeros_like(x))
+    one = WENO_NEW()
+    two = WENO()
+    one_left = one.compute(y, 1)
+    one_right = one.compute(y, -1)
+    two_left = two.compute(y, 1)
+    two_right = two.compute(y, -1)
+    np.testing.assert_almost_equal(one_left, two_left)
+    np.testing.assert_almost_equal(one_right, two_right)
+
+def _test_new_weno_helper(y, filename):
+    weno = WENO_NEW()
+    left_bdry = weno.compute(y, 1)
+    right_bdry = weno.compute(y, -1)
+    #test assumes all flow is to the right
+    dx = -(left_bdry - np.roll(left_bdry, -1))
+    comp = scipy.io.loadmat(filename)
+    y_exact = comp['fo']
+    assert(np.all(abs(y_exact - y) < 0.000000001))
+    assert(np.all(abs(comp['z'] - dx) < 0.0000000001))
+    if interactive_test:
+        pyp.plot(dx.T)
+        pyp.plot(comp['z'].T)
+        pyp.show()
 
 def test_weno_more():
     x = np.linspace(-5, 5, 100)
     y = np.where(x <= 0.0, np.ones_like(x), np.zeros_like(x))
     filename = data_root + '/test/test_weno_jumpy.mat'
-    _test_weno_helper(y, filename)
+    _test_new_weno_helper(y, filename)
 
 def test_weno_smooth():
     x = np.linspace(-5, 5, 100)
     y = np.exp(-x ** 2)
     filename = data_root + '/test/test_weno_smooth.mat'
-    _test_weno_helper(y, filename)
+    _test_new_weno_helper(y, filename)
 
 def _test_weno_helper(y, filename):
     """
@@ -111,18 +162,18 @@ def _test_weno_helper(y, filename):
     y_exact = comp['fo']
     #Check that the final result AND
     #all the weights are the same
-    assert(np.all(y_exact - y < 0.000000001))
-    assert(np.all(betas[0] - comp['b1'] < 0.00000001))
-    assert(np.all(betas[1] - comp['b2'] < 0.00000001))
-    assert(np.all(betas[2] - comp['b3'] < 0.00000001))
-    assert(np.all(terms[0] - comp['fp1'] < 0.00000001))
-    assert(np.all(terms[0] - comp['fp1'] < 0.00000001))
-    assert(np.all(terms[1] - comp['fp2'] < 0.00000001))
-    assert(np.all(terms[2] - comp['fp3'] < 0.00000001))
-    assert(np.all(wts[0] - comp['w1'] < 0.000000001))
-    assert(np.all(wts[1] - comp['w2'] < 0.000000001))
-    assert(np.all(wts[2] - comp['w3'] < 0.000000001))
-    assert(np.all(comp['z'] - dx < 0.0000000001))
+    assert(np.all(abs(y_exact - y) < 0.000000001))
+    assert(np.all(abs(betas[0] - comp['b1']) < 0.00000001))
+    assert(np.all(abs(betas[1] - comp['b2']) < 0.00000001))
+    assert(np.all(abs(betas[2] - comp['b3']) < 0.00000001))
+    assert(np.all(abs(terms[0] - comp['fp1']) < 0.00000001))
+    assert(np.all(abs(terms[0] - comp['fp1']) < 0.00000001))
+    assert(np.all(abs(terms[1] - comp['fp2']) < 0.00000001))
+    assert(np.all(abs(terms[2] - comp['fp3']) < 0.00000001))
+    assert(np.all(abs(wts[0] - comp['w1']) < 0.000000001))
+    assert(np.all(abs(wts[1] - comp['w2']) < 0.000000001))
+    assert(np.all(abs(wts[2] - comp['w3']) < 0.000000001))
+    assert(np.all(abs(comp['z'] - dx) < 0.0000000001))
     #Change the below to True to see the comparison
     #if it doesn't match
     if False:
