@@ -18,7 +18,7 @@ class CompareSolutions(unittest.TestCase):
                                                        1.0, 0.0, x)
         self.assertTrue(utilities.mse(displacement, displacement2) < 0.0001)
 
-    # this compares the dimensional segall solution to my dimensionless 
+    # this compares the dimensional segall solution to my dimensionless
     # solution using my parameters
     def testCompareViscoelasticSolutions(self):
         alpha = 1.0
@@ -47,12 +47,12 @@ class CompareSolutions(unittest.TestCase):
         u = map(lambda t: constant_slip_maxwell.solution(x, t, depth_of_fault, H, slip), t_over_t_r)
 
         time0analyticsolution = (slip / pi) * np.arctan(depth_of_fault / x)
-        self.assertTrue(utilities.mse(u[0], time0analyticsolution) < 0.0001) 
+        self.assertTrue(utilities.mse(u[0], time0analyticsolution) < 0.0001)
         return u, x, H
 
     def testCompareVariableSlip(self):
         slip = lambda z: 1
-        x = np.arange(0.05, 10.0, 0.05)
+        x = np.arange(0.05, 10.0, 0.5)
         t = np.arange(0.0, 5.0)
         alpha = 1
 
@@ -62,7 +62,7 @@ class CompareSolutions(unittest.TestCase):
         u_e = full_elastic.elastic_half_space(slip, x)
         # print utilities.mse(u_t[0], u_elastic)
         self.assertTrue(utilities.mse(u_t[0], u_e) < 0.0001)
-        
+
         #then compare to viscoelastic solutions -- they should match at all times because slip is constant
         u_constant_slip_ve = map(lambda t_in: constant_slip_maxwell_dimensionless.solution(x, t_in, alpha), t)
         # pyp.figure(1)
@@ -76,7 +76,7 @@ class CompareSolutions(unittest.TestCase):
 
     def testAlphaLimit(self):
         slip = lambda z: 1
-        x = np.arange(0.05, 10.0, 0.05)
+        x = np.arange(0.05, 10.0, 0.50)
         t = np.arange(0.0, 5.0)
         alpha = 1000000000.0
         u_t = np.array(map(lambda t_in: full_viscoelastic.solution(slip, x, t_in, alpha), t))
@@ -88,8 +88,8 @@ class CompareSolutions(unittest.TestCase):
         t = [0]
         alpha = 1.0
         u_t = np.array(map(lambda t_in: full_viscoelastic.solution(slip, x, t_in, alpha), t))
-        self.assertTrue((abs(u_t[0][0] - 0.5) < 0.001).all())        
-        self.assertTrue((abs(u_t[0][1] - 0.0) < 0.001).all())        
+        self.assertTrue((abs(u_t[0][0] - 0.5) < 0.001).all())
+        self.assertTrue((abs(u_t[0][1] - 0.0) < 0.001).all())
 
     def testSlipLimit(self):
         slip = lambda z: 0
@@ -97,7 +97,7 @@ class CompareSolutions(unittest.TestCase):
         t = [0]
         alpha = 1.0
         u_t = np.array(map(lambda t_in: full_viscoelastic.solution(slip, x, t_in, alpha), t))
-        self.assertTrue((u_t == 0.0).all())        
+        self.assertTrue((u_t == 0.0).all())
 
     def testmse(self):
         a = utilities.mse([1,2,3],[0,1,2])

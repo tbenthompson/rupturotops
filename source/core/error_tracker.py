@@ -13,11 +13,11 @@ class ErrorTracker(object):
     that accepts one parameter: time. and produces the exact result.
     """
 
-    def __init__(self, x, delta_x, init, exact, delta_t, params):
+    def __init__(self, mesh, init, exact, delta_t, params):
         # Defaults
         self.error_norm = 1
         self.params_plotter = None
-        self.delta_x = delta_x
+        self.mesh = mesh
 
         if params is not None:
             self.handle_params(params)
@@ -30,7 +30,7 @@ class ErrorTracker(object):
         self.error = [self.initial_error]
 
         self.current_plot = UpdatePlotter(delta_t, self.params_plotter)
-        self.current_plot.add_line(x, self.diff_old, '*')
+        self.current_plot.add_line(self.mesh.x, self.diff_old, '*')
         self.all_time_plot = UpdatePlotter(delta_t, self.params_plotter)
         self.all_time_plot.add_line([0], [0], '-')
 
@@ -57,7 +57,7 @@ class ErrorTracker(object):
         exact = self.exact_soln(t)
         diff = y - exact
         self.diff_old = diff
-        e = ErrorTracker.calc_norm(diff, self.error_norm, self.delta_x)
+        e = ErrorTracker.calc_norm(diff, self.error_norm, self.mesh.delta_x)
         self.error.append(e)
 
         self.current_plot.update(diff, t)
@@ -67,6 +67,7 @@ class ErrorTracker(object):
 #-------------------------------------------------------------------
 # TESTS
 #-------------------------------------------------------------------
+from core.mesh import Mesh
 
 
 def test_error_norm():
@@ -88,19 +89,18 @@ def test_error_norm2():
 
 def test_error_tracker():
     delta_x = 0.01 * np.ones(100)
-    x = np.linspace(0, 1, 100)
     y = np.linspace(0.01, 1.01, 100)
     exact = lambda t: np.linspace(0, 1, 100) + t
     params = DataController()
     params.error_norm = 1
     params.plotter = DataController()
     params.plotter.never_plot = True
-    e1 = ErrorTracker(x, delta_x, y, exact, 1.0, params)
+    e1 = ErrorTracker(Mesh(delta_x), y, exact, 1.0, params)
     params.error_norm = 2
-    e2 = ErrorTracker(x, delta_x, y, exact, 1.0, params)
+    e2 = ErrorTracker(Mesh(delta_x), y, exact, 1.0, params)
     for i in range(1, 10):
         # the exact result is x + i
-        e1.update(x + 0.9 * i, float(i))
+        e1.update(e1.mesh.x + 0.9 * i, float(i))
         # in any norm the error should be 0.i
         assert(abs(e1.error[i] - i * 0.1) <= 1e-9)
 

@@ -1,5 +1,8 @@
 import numpy as np
 class RiemannSolver(object):
+    """
+    Really it's a Godunov flux
+    """
     def __init__(self):
         pass
 
