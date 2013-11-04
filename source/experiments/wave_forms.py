@@ -12,7 +12,7 @@ def step(x):
                     np.ones_like(x),
                     np.zeros_like(x))
 
-def sin_wave(x, width = 10.0):
+def sin_4(x, width = 10.0):
     return np.sin(width * x) ** 4
 
 def test_wave_forms():
@@ -24,5 +24,5 @@ def test_wave_forms():
     assert(gaussian(0.0, 2.0) == 1.0/np.exp(2))
     assert(square(0.75 - 0) == 1.0)
     assert(square(1.5 - 0.4) == 0.0)
-    assert(sin_wave(0 - 0) == 0.0)
-    assert(sin_wave(2 - 1, 3.0 * np.pi/2.0) == 1.0)
+    assert(sin_4(0 - 0) == 0.0)
+    assert(sin_4(2 - 1, 3.0 * np.pi/2.0) == 1.0)

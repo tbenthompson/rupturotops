@@ -20,6 +20,7 @@ class FVM(Experiment):
         self.t_max = 1.0
         self.temp_analytical = wave_forms.square
         self.v = 1.0
+        self.delta_x = 0.01 * np.ones(100)
         if 'plotter' not in self.params:
             self.params.plotter = None
         if 'error_tracker' not in self.params:
@@ -30,10 +31,10 @@ class FVM(Experiment):
             self.t_max = self.params.t_max
         if 'analytical' in self.params:
             self.temp_analytical = self.params.analytical
+        if 'delta_x' in self.params:
+            self.delta_x = self.params.delta_x
 
-        self.delta_x = self.params.delta_x
-        self.domain_width = np.sum(self.delta_x)
-        self.x = FVM.positions_from_spacing(self.delta_x)
+        self.x, self.domain_width = FVM.positions_from_spacing(self.delta_x)
         self.delta_t = FVM.calc_time_step(self.delta_x)
 
         self.params.delta_t = self.delta_t
@@ -45,7 +46,7 @@ class FVM(Experiment):
         self.exact = self.analytical(self.t_max)
 
         self.riemann = RiemannSolver()
-        self.reconstructor = WENO_NEW(5)
+        self.reconstructor = WENO_NEW(7)
 
     @staticmethod
     def positions_from_spacing(spacings):
@@ -55,8 +56,9 @@ class FVM(Experiment):
         subtract half of delta_x again.
         """
         x = np.cumsum(spacings)
+        domain_width = x[-1]
         x = x - spacings / 2.0
-        return x
+        return x, domain_width
 
     @staticmethod
     def calc_time_step(delta_x):
@@ -91,8 +93,8 @@ class FVM(Experiment):
         dt = np.min(self.delta_t)
         t = dt
 
-        self.error_tracker = ErrorTracker(self.x, result,
-                                     self.analytical, dt,
+        self.error_tracker = ErrorTracker(self.x, self.delta_x,
+                                          result, self.analytical, dt,
                                      self.params.error_tracker)
         self.params.plotter.x_bounds = [np.min(self.x), np.max(self.x)]
         self.params.plotter.y_bounds = [np.min(result), np.max(result)]
@@ -103,9 +105,9 @@ class FVM(Experiment):
 
         while t <= self.t_max:
             result = ssprk4.ssprk4(self.spatial_deriv, result, t, dt)
-            t += dt
             self.error_tracker.update(result, t)
             soln_plot.update(result, t)
+            t += dt
 
         soln_plot.update(result, 0)
         soln_plot.add_line(self.x, self.exact)
@@ -138,6 +140,13 @@ def test_time_step():
     delta_x = 1.0
     assert(FVM.calc_time_step(delta_x) <= ssprk4.cfl_max)
 
+def test_positions_from_spacing():
+    delta_x = np.array([0.5, 1.0, 0.1, 2.0])
+    correct = np.array([0.25, 1.0, 1.55, 2.6])
+    x, width = FVM.positions_from_spacing(delta_x)
+    assert((x == correct).all())
+    assert(width == 3.6)
+
 def test_mesh_initialize():
     params = DataController()
     params.delta_x = np.array([0.5, 1.0, 0.1, 2.0])
@@ -164,17 +173,9 @@ def test_fvm_flux_compute():
             continue
         np.testing.assert_almost_equal(deriv[i], 0.0)
 
-def test_circular_boundary_conditions():
-    params = DataController()
-    params.delta_x = 0.1 * np.ones(50)
-    params.analytical = lambda x: x
-    fvm = FVM(params)
-    added_ghosts = fvm.boundary_cond(0, fvm.init)
-    np.testing.assert_almost_equal(added_ghosts[0], 4.85)
-    np.testing.assert_almost_equal(added_ghosts[1], 4.95)
-    np.testing.assert_almost_equal(added_ghosts[-2], 0.05)
-    np.testing.assert_almost_equal(added_ghosts[-1], 0.15)
-    np.testing.assert_almost_equal(fvm.analytical(5.0), fvm.analytical(0.0))
+def test_analytical_periodicity():
+    fvm = FVM()
+    np.testing.assert_almost_equal(fvm.analytical(fvm.domain_width), fvm.analytical(0.0))
 
 def test_fvm_boundaries():
     delta_x = 0.1 * np.ones(50)
@@ -182,7 +183,12 @@ def test_fvm_boundaries():
 
 def test_fvm_simple():
     delta_x = 0.005 * np.ones(1000)
-    _test_fvm_helper(wave_forms.sin_wave, 1.0, delta_x, 0.05)
+    _test_fvm_helper(wave_forms.sin_4, 1.0, delta_x, 0.05)
+
+def test_fvm_varying_spacing():
+    delta_x = np.linspace(0.02, 0.02, 800)
+    _test_fvm_helper(lambda x: wave_forms.sin_4(x, np.pi/2.0),
+                     2.0, delta_x, 0.1)
 
 def _test_fvm_helper(wave, t_max, delta_x, error_bound):
     #Simple test to make sure the code works right
@@ -190,6 +196,7 @@ def _test_fvm_helper(wave, t_max, delta_x, error_bound):
     my_params.delta_x = delta_x
     my_params.plotter = DataController()
     my_params.plotter.always_plot = False
+    my_params.plotter.never_plot = not interactive_test
     my_params.plotter.plot_interval = 0.5
     my_params.t_max = t_max
     my_params.analytical = wave

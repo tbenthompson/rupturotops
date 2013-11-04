@@ -13,10 +13,11 @@ class ErrorTracker(object):
     that accepts one parameter: time. and produces the exact result.
     """
 
-    def __init__(self, x, init, exact, delta_t, params):
+    def __init__(self, x, delta_x, init, exact, delta_t, params):
         # Defaults
         self.error_norm = 1
         self.params_plotter = None
+        self.delta_x = delta_x
 
         if params is not None:
             self.handle_params(params)
@@ -40,21 +41,25 @@ class ErrorTracker(object):
             self.params_plotter = params.plotter
 
     @staticmethod
-    def calc_norm(vector, norm):
+    def calc_norm(vector, norm, delta_x=None):
         if norm is np.Inf:
             return abs(np.max(vector))
-        err = (np.sum(abs(vector) ** norm) / len(vector)) ** \
+        if delta_x is None:
+            delta_x = 1
+            denominator = len(vector)
+        else:
+            denominator = np.sum(delta_x)
+        err = (np.sum(abs(vector * delta_x) ** norm) / denominator) ** \
             (1.0 / norm)
         return err
 
     def update(self, y, t):
         exact = self.exact_soln(t)
-        padded_exact = np.pad(exact, 1, 'constant')
-        tv = np.sum(abs(padded_exact - np.roll(padded_exact, 1)))
-        print "Total Variation:" + str(tv)
         diff = y - exact
         self.diff_old = diff
-        self.error.append(ErrorTracker.calc_norm(diff, self.error_norm))
+        e = ErrorTracker.calc_norm(diff, self.error_norm, self.delta_x)
+        self.error.append(e)
+
         self.current_plot.update(diff, t)
         self.all_time_plot.update(self.error, t,
                                   x=np.arange(0, len(self.error)))
@@ -62,6 +67,7 @@ class ErrorTracker(object):
 #-------------------------------------------------------------------
 # TESTS
 #-------------------------------------------------------------------
+
 
 def test_error_norm():
     vec = np.linspace(0, 1, 3)
@@ -73,7 +79,15 @@ def test_error_norm():
     assert(linf == 1.0)
 
 
+def test_error_norm2():
+    vec = np.linspace(0, 1, 4)
+    delta_x = np.array([1.0, 0.1, 2.0, 1.0])
+    l1 = ErrorTracker.calc_norm(vec, 1, delta_x)
+    np.testing.assert_almost_equal(l1, 71.0 / (30.0 * 4.1))
+
+
 def test_error_tracker():
+    delta_x = 0.01 * np.ones(100)
     x = np.linspace(0, 1, 100)
     y = np.linspace(0.01, 1.01, 100)
     exact = lambda t: np.linspace(0, 1, 100) + t
@@ -81,9 +95,9 @@ def test_error_tracker():
     params.error_norm = 1
     params.plotter = DataController()
     params.plotter.never_plot = True
-    e1 = ErrorTracker(x, y, exact, 1.0, params)
+    e1 = ErrorTracker(x, delta_x, y, exact, 1.0, params)
     params.error_norm = 2
-    e2 = ErrorTracker(x, y, exact, 1.0, params)
+    e2 = ErrorTracker(x, delta_x, y, exact, 1.0, params)
     for i in range(1, 10):
         # the exact result is x + i
         e1.update(x + 0.9 * i, float(i))
@@ -95,4 +109,4 @@ def test_error_tracker():
         # the difference
         e2.update(new_val, float(i))
         # L2 norm of the error should be 0.(i + 1)
-        assert(abs(e2.error[i] - (i * 0.1)) <= 1e-9)
+        assert(abs(e2.error[i] - (i * 0.01)) <= 1e-9)
