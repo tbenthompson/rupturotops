@@ -52,7 +52,7 @@ class FVM(Experiment):
 
         self.riemann = RiemannSolver()
         self.bc = PeriodicBC()
-        self.reconstructor = WENO(self.mesh)
+        self.reconstructor = WENO_NEW2(self.mesh)
         self.spatial_deriv_obj = SpatialDeriv(self.mesh, self.reconstructor,
                                   self.bc, self.riemann, self.v)
 
@@ -95,7 +95,7 @@ class FVM(Experiment):
 # TESTS
 #----------------------------------------------------------------------------
 from core.data_controller import DataController
-interactive_test = False
+interactive_test = True
 
 
 def test_total_variaton():
@@ -146,10 +146,10 @@ def test_fvm_simple():
     _test_fvm_helper(wave_forms.sin_4, 2.0, delta_x, 0.05)
 #
 #
-# def test_fvm_varying_spacing():
-#     delta_x = np.concatenate((0.005 * np.ones(500), 0.02 * np.ones(500)))
-#     _test_fvm_helper(lambda x: wave_forms.sin_4(x, np.pi / 2.0),
-#                      2.0, delta_x, 0.1)
+def test_fvm_varying_spacing():
+    delta_x = np.concatenate((0.02 * np.ones(5), 0.1 * np.ones(49)))
+    _test_fvm_helper(lambda x: wave_forms.sin_4(x, np.pi / 2.0),
+                     2.0, delta_x, 0.1)
 
 
 def _test_fvm_helper(wave, t_max, delta_x, error_bound):
