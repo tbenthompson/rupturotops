@@ -8,7 +8,7 @@ from core.mesh import Mesh
 assert(_DEBUG)
 import experiments.wave_forms as wave_forms
 import experiments.ssprk4 as ssprk4
-from experiments.weno import WENO
+from experiments.weno import WENO_NEW2
 from experiments.boundary_conds import PeriodicBC
 from experiments.riemann_solver import RiemannSolver
 
@@ -51,7 +51,7 @@ class FVM(Experiment):
 
         self.riemann = RiemannSolver()
         self.bc = PeriodicBC()
-        self.reconstructor = WENO(5)
+        self.reconstructor = WENO()
 
     @staticmethod
     def calc_time_step(delta_x):
