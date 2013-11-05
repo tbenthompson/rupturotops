@@ -45,11 +45,15 @@ from scipy.special import erf
 # apportioned as a function of the temperature
 ################################
 
-def abc():
-    x = np.linspace(-1000, 0, 10)
-    y = np.exp(-x**2 / 1000000)
-    factor = np.sqrt(1000000)
-    y = 1 + 1000 ** (1 + erf(x / factor)) / 10
-    print sum(y)
-    pyp.plot(x, y)
-    pyp.show()
+# def abc():
+#     x = np.linspace(-1000, 0, 10)
+#     y = np.exp(-x**2 / 1000000)
+#     factor = np.sqrt(1000000)
+#     y = 1 + 1000 ** (1 + erf(x / factor)) / 10
+#     print sum(y)
+#     pyp.plot(x, y)
+#     pyp.show()
+
+from pyweno_nonuniform_new import jiang_shu_smoothness_coefficients
+
+jiang_shu_smoothness_coefficients(3, [0.0])

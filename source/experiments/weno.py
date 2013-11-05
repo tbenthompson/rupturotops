@@ -1,14 +1,12 @@
 import scipy.io
 import matplotlib.pyplot as pyp
 from core.debug import _DEBUG
-assert(_DEBUG)
 import numpy as np
-from numba import autojit
-assert(autojit)
+# from numba import autojit
 
 import pyweno.weno
-from pyweno.nonuniform import reconstruction_coefficients, optimal_weights
-from pyweno.nonuniform import jiang_shu_smoothness_coefficients
+from pyweno_nonuniform import reconstruction_coefficients, optimal_weights
+from pyweno_nonuniform import jiang_shu_smoothness_coefficients
 
 
 class WENO(object):
@@ -18,15 +16,11 @@ class WENO(object):
     package. Only works properly for uniform mesh spacings.
     """
 
-    def __init__(self, order=5):
+    def __init__(self, mesh, order=5):
         self.order = order
         self.half_width = int((self.order + 1) / 2.0)
 
     def compute(self, now, direc):
-        if direc == 1:
-            direc = 'left'
-        else:
-            direc = 'right'
         padded = np.pad(now, self.half_width, 'constant')
         retval = pyweno.weno.reconstruct(padded, self.order, direc)
         return retval[self.half_width:-self.half_width]
@@ -41,7 +35,8 @@ class WENO_NEW2(object):
 
     This should be migrated to using sympy variables so that the expressions
     can be differentiated and used for the generalized Riemann problem
-    in the ADER scheme.
+    in the ADER scheme. In fact, it should probably just be hardcoded for
+    order = 5. Or I could implement some saving and loading scheme?
 
     SUPER SLOW IMPLEMENTATION!!
     """
@@ -50,33 +45,38 @@ class WENO_NEW2(object):
         self.mesh = mesh
         self.order = order
         self.half_width = int((self.order + 1) / 2.0)
-        padded_edges = self.mesh.extend_edges(self.half_width)
+        padded_edges = self.mesh.extend_edges(self.half_width + 1)
         self.coeffs = reconstruction_coefficients(3, [-1, 1],
                                                   padded_edges)
+        self.coeffs = self.coeffs[self.half_width - 1:-self.half_width + 1]
         self.weights = optimal_weights(3, [-1, 1], padded_edges)
+        self.weights = self.weights[self.half_width - 1:-self.half_width + 1]
         self.smoothness = jiang_shu_smoothness_coefficients(3,
                                                             padded_edges)
+        self.smoothness = self.smoothness[self.half_width - 1:
+                                          -self.half_width + 1]
         self.eps = 1e-6
 
     def compute(self, now, side):
-        if side == 1:
-            side_index = 1
-        else:
+        if side == 'left':
             side_index = 0
+        else: #side == 'right'
+            side_index = 1
 
         result = []
-        padded = np.pad(now, self.half_width, 'constant')
+        padded = np.pad(now, self.half_width - 1, 'constant')
+        # test_range = range(side_index, len(now) - 1 + side_index)
         for i in range(0, len(now)):
-            # _DEBUG()
-            which_chunk = self.get_chunk(padded, self.half_width + i)
-            which_coeffs = self.coeffs[self.half_width + i][side_index]
-            which_smoothness = self.smoothness[self.half_width + i]
-            which_weights = self.weights[self.half_width + i][side_index]
+            which_chunk = self.get_chunk(padded, self.half_width - 1 + i)
+            which_coeffs = self.coeffs[i][side_index]
+            which_smoothness = self.smoothness[i]
+            which_weights = self.weights[i][side_index][::-1]
             beta = self.mult_with_smoothness(which_chunk, which_smoothness)
             weights = self.scaled_weights(which_weights, beta)
             small_polynomials = self.mult_with_coeffs(which_chunk,
                                                       which_coeffs)
             result.append(np.sum(weights * small_polynomials))
+        # _DEBUG(10)
         return np.array(result)
 
     def get_chunk(self, padded, center, reverse=False):
@@ -114,7 +114,10 @@ class WENO_NEW2(object):
 
     def scaled_weights(self, weights, beta):
         w = weights / ((self.eps + beta) ** 2)
-        w = w / np.sum(w)
+        sum_w = np.sum(w)
+        if sum_w == 0.0:
+            return w
+        w = w / sum_w
         return w
 
 
@@ -162,7 +165,6 @@ def test_mult_with_smoothness():
     correct = \
         13.0 / 12.0 * np.array([0.0, 0.0, 1.0]) ** 2 + \
         1.0 / 4.0 * np.array([2.0, -2.0, -1.0]) ** 2
-    # _DEBUG()
     beta = w.mult_with_smoothness(now_chunk, smoothness)
     assert(type(beta) == np.ndarray)
     np.testing.assert_almost_equal(beta, correct)
@@ -182,42 +184,50 @@ def test_mult_with_coeffs():
     np.testing.assert_almost_equal(result, correct)
 
 
-def test_weno_compare():
-    dx = np.ones(5)
-    y_easy = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
-    y_harder = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
-    m = Mesh(dx)
-    w1 = WENO()
-    w2 = WENO_NEW2(m)
-    result1 = w1.compute(y_easy, -1)
-    result2 = w2.compute(y_easy, -1)
-    np.testing.assert_almost_equal(result1, result2)
-    result1 = w1.compute(y_harder, -1)
-    result2 = w2.compute(y_harder, -1)
-    np.testing.assert_almost_equal(result1, result2)
+def test_weno_compare_hard():
+    y_harder = np.array([0.0, 0.0, 40.0, 0.0, 0.0])
+    _test_weno_compare_helper(y_harder)
 
+def test_weno_compare_easy():
+    y_easy = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
+    _test_weno_compare_helper(y_easy)
+
+def _test_weno_compare_helper(y):
+    dx = np.ones(len(y))
+    m = Mesh(dx)
+    w1 = WENO(m)
+    w2 = WENO_NEW2(m)
+    result1 = w1.compute(y, 'left')
+    result2 = w2.compute(y, 'left')
+    if interactive_test:
+        pyp.plot(result1)
+        pyp.plot(result2)
+        pyp.show()
+    np.testing.assert_almost_equal(result1, result2)
+    result1 = w1.compute(y, 'right')
+    result2 = w2.compute(y, 'right')
+    np.testing.assert_almost_equal(result1, result2)
 
 def test_nonuniform_weno():
     dx = np.array([1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0])
     y = np.array([2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0])
     m = Mesh(dx)
-    w1 = WENO()
+    w1 = WENO(m)
     w2 = WENO_NEW2(m)
-    result1 = w1.compute(y, -1)
-    result2 = w2.compute(y, -1)
+    result1 = w1.compute(y, 'left')
+    result2 = w2.compute(y, 'left')
     assert((result1 != result2).all())
 
-
 def test_higher_order_weno():
-    w = WENO(11)
+    w = WENO(Mesh(), 11)
     assert(w.order == 11)
     assert(w.half_width == 6)
     assert(type(w.half_width) == int)
 
 
-def _test_weno_helper(y, filename):
-    weno = WENO()
-    left_bdry = weno.compute(y, 1)
+def _test_weno_helper(x, y, filename):
+    weno = WENO_NEW2(Mesh((x - np.roll(x, 1))[1:]))
+    left_bdry = weno.compute(y, 'left')
     # unidirectional flow, so we only care about incoming from the left
     # and outgoing to the right
     # right_bdry = weno.compute(y, -1)
@@ -226,22 +236,22 @@ def _test_weno_helper(y, filename):
     comp = scipy.io.loadmat(filename)
     y_exact = comp['fo']
     assert(np.all(abs(y_exact - y) < 0.000000001))
-    assert(np.all(abs(comp['z'] - dx) < 0.0000000001))
     if interactive_test:
         pyp.plot(dx.T)
         pyp.plot(comp['z'].T)
         pyp.show()
+    assert(np.all(abs(comp['z'] - dx) < 0.0001))
 
 
 def test_weno_more():
     x = np.linspace(-5, 5, 100)
     y = np.where(x <= 0.0, np.ones_like(x), np.zeros_like(x))
     filename = data_root + '/test/test_weno_jumpy.mat'
-    _test_weno_helper(y, filename)
+    _test_weno_helper(x, y, filename)
 
 
 def test_weno_smooth():
     x = np.linspace(-5, 5, 100)
     y = np.exp(-x ** 2)
     filename = data_root + '/test/test_weno_smooth.mat'
-    _test_weno_helper(y, filename)
+    _test_weno_helper(x, y, filename)
