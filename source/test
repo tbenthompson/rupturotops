@@ -1,1 +1,1 @@
-find ./ -name "*.py" |xargs py.test -vs
+py.test -vs --ignore "./ignore"

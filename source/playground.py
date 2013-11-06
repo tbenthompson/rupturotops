@@ -53,7 +53,3 @@ from scipy.special import erf
 #     print sum(y)
 #     pyp.plot(x, y)
 #     pyp.show()
-
-from pyweno_nonuniform_new import jiang_shu_smoothness_coefficients
-
-jiang_shu_smoothness_coefficients(3, [0.0])

@@ -8,7 +8,7 @@ from core.mesh import Mesh
 assert(_DEBUG)
 import experiments.wave_forms as wave_forms
 import experiments.ssprk4 as ssprk4
-from experiments.weno import WENO, WENO_NEW2
+from experiments.weno import WENO
 from experiments.boundary_conds import PeriodicBC
 from experiments.riemann_solver import RiemannSolver
 from experiments.spatial_deriv import SpatialDeriv
@@ -52,7 +52,7 @@ class FVM(Experiment):
 
         self.riemann = RiemannSolver()
         self.bc = PeriodicBC()
-        self.reconstructor = WENO_NEW2(self.mesh)
+        self.reconstructor = WENO(self.mesh)
         self.spatial_deriv_obj = SpatialDeriv(self.mesh, self.reconstructor,
                                   self.bc, self.riemann, self.v)
 
@@ -95,7 +95,7 @@ class FVM(Experiment):
 # TESTS
 #----------------------------------------------------------------------------
 from core.data_controller import DataController
-interactive_test = True
+interactive_test = False
 
 
 def test_total_variaton():
