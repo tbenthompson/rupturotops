@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from matplotlib import pyplot as pyp
 from core.experiment import Experiment
@@ -12,11 +13,6 @@ from experiments.weno import WENO
 from experiments.boundary_conds import PeriodicBC
 from experiments.riemann_solver import RiemannSolver
 from experiments.spatial_deriv import SpatialDeriv
-
-# All the static methods probably should be moved to their
-# own classes to enforce some separation of responsibilities
-# delta_t calculation, grid calculation go in meshing class
-# separate boundary conditions
 
 
 class FVM(Experiment):
@@ -128,8 +124,6 @@ def test_mesh_initialize():
     assert((np.min(fvm.delta_t) <= 0.1 * ssprk4.cfl_max))
 
 
-
-
 def test_analytical_periodicity():
     fvm = FVM()
     np.testing.assert_almost_equal(fvm.analytical(fvm.mesh.domain_width),
@@ -144,10 +138,18 @@ def test_fvm_boundaries():
 def test_fvm_simple():
     delta_x = 0.005 * np.ones(200)
     _test_fvm_helper(wave_forms.sin_4, 2.0, delta_x, 0.05)
-#
-#
+
+# This test shouldn't work with the current WENO implementation because
+# the reconstruction is uniform in space
+@pytest.mark.xfail
 def test_fvm_varying_spacing():
-    delta_x = np.concatenate((0.02 * np.ones(5), 0.1 * np.ones(49)))
+    delta_x = []
+    for i in range(100):
+        if i % 2 == 0:
+            delta_x.append(0.01)
+        else:
+            delta_x.append(0.1)
+    delta_x = np.array(delta_x)
     _test_fvm_helper(lambda x: wave_forms.sin_4(x, np.pi / 2.0),
                      2.0, delta_x, 0.1)
 

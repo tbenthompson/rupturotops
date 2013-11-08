@@ -14,13 +14,56 @@ import sympy
 from sympy.utilities.autowrap import autowrap
 
 import pyweno.reconstruction_coeffs as rc
-import pyweno.symbolic as symbolic
 from core.debug import _DEBUG
 
 
-#
+def polynomial_interpolator(x, y):
+    """Build a symbolic polynomial that interpolates the points (x_i, y_i).
 
-def reconstruction_coefficients(k, xi, x):
+    The returned polynomial is a function of the SymPy variable x.
+    """
+
+    k, xi = len(x), sym('x')
+
+    sum_i = 0
+    for i in range(k):
+        ns = range(k)
+        ns.remove(i)
+
+        num, den = 1, 1
+        for n in ns:
+            num *= xi - x[n]
+            den *= x[i] - x[n]
+
+        sum_i += num / den * y[i]
+
+    return sum_i
+
+
+def primitive_polynomial_interpolator(x, y):
+    """Build a symbolic polynomial that approximates the primitive
+    function f such that f(x_i) = sum_j y_j * (x_{j+1} - x_{j}).
+
+    The returned polynomial is a function of the SymPy variable 'x'.
+    """
+
+    Y = [0]
+    for i in range(len(y)):
+        Y.append(Y[-1] + (x[i + 1] - x[i]) * y[i])
+
+    return polynomial_interpolator(x, Y)
+
+def _pt(a, b, x):
+    """Map x in [-1, 1] to x in [a, b]."""
+
+    half = sympy.sympify('1/2')
+
+    w = half * (b - a)
+    c = half * (a + b)
+
+    return w * x + c
+
+def reconstruction_coefficients(k, xi, x, d):
     r"""Numerically compute the reconstruction coefficients for a 2k-1
     order WENO scheme corresponding to the reconstruction points in *xi*
     on the non-uniform grid *x*.
@@ -42,23 +85,34 @@ def reconstruction_coefficients(k, xi, x):
     for each :math:`l` from 0 to ``len(xi)``.
 
     """
+    i, n, x = k - 1, len(xi), sym('x')
 
-    X = np.array(x)
-    N = len(X) - 1
-    n = len(xi)
+    # build arrays of cell boundaries and cell averages
+    xs = []
+    for j in range(k + 1):
+        xs.append(sympy.var('x%d' % j))
+    fs = [sym('f[i%+d]' % j) for j in range(-k + 1, k)]
+    c = {'n': n, 'k': k, 'd': d}
 
-    c = np.zeros((N, n, k, k))       # indexed as c[i,l,r,j]
+    # compute reconstruction coefficients for each left shift r
+    for l, r in product(range(n), range(k)):
+        p = primitive_polynomial_interpolator(xs[i - r:i - r + k + 1],
+                                              fs[i - r:i - r + k]).diff(x, d + 1)
+        for j in range(k):
+            z = _pt(xs[i], xs[i + 1], xi[l])
+            c[l, r, j] = p.subs(x, z).expand().coeff(fs[i - r + j])
 
-    for i in range(k - 1, N - k + 1):
-        for l in range(n):
-            z = 0.5 * (X[i] + X[i + 1]) + 0.5 * (X[i + 1] - X[i]) * xi[l]
-            for r in range(k):
-                c[i, l, r, :] = rc.reconstruction_coeffs(z, i, r, k, X)
+            if c[l, r, j] is None:
+                c[l, r, j] = 0
 
+            c[l, r, j] *= dx ** d
+
+    _DEBUG()
     return c
 
+def test_reconstruction_coeffs_gen():
+    reconstruction_coefficients(3, )
 
-#
 
 def optimal_weights(k, xi, x, tolerance=1e-12):
     r"""Compute the optimal weights for a 2k-1 order WENO scheme
@@ -169,7 +223,7 @@ def jiang_shu_smoothness_create(k, filename=None):
     for j in range(k):
         ys.append(sympy.var('y%d' % j))
 
-    p = symbolic.primitive_polynomial_interpolator(xs, ys)
+    p = primitive_polynomial_interpolator(xs, ys)
     p = p.as_poly(x)
     p = p.diff(x)
 
@@ -205,7 +259,8 @@ def jiang_shu_smoothness_create(k, filename=None):
                 # to finish this implementation, i would need to use the sympy codegen utility and
                 # f2py to create fortran functions for the smoothness coefficients. write the
                 # code here
-                # l = autowrap([coeffs_expr], args=args, tempdir=autogen_fortran/
+                # l = autowrap([coeffs_expr], args=args,
+                # tempdir=autogen_fortran/
                 inner_coeffs_list.append(l)
             coeffs_list.append(inner_coeffs_list)
         fncs.append(coeffs_list)
@@ -213,12 +268,16 @@ def jiang_shu_smoothness_create(k, filename=None):
     with open(filename, 'w') as f:
         cloud.serialization.cloudpickle.dump(fncs, f)
 
+
 def generate_function(coeffs_expr, args, directory, name):
 
 # This test takes forever to run, so it's okay to turn it off unless it's
 # needed.
+
+
 def test_jiang_shu_smoothness_create():
     jiang_shu_smoothness_create(3)
+
 
 def jiang_shu_smoothness_coefficients(k, x, filename=None):
     r"""Compute the Jiang-Shu smoothness coefficients for a 2k-1 order
@@ -258,17 +317,18 @@ def jiang_shu_smoothness_coefficients(k, x, filename=None):
 
     return beta
 
+
 def test_jiang_shu_smoothness_coefficients():
     correct = \
-        [[[  3.33333333, -10.33333333,   3.66666667],
-         [  0.        ,   8.33333333,  -6.33333333],
-         [  0.        ,   0.        ,   1.33333333]],
-        [[  1.33333333,  -4.33333333,   1.66666667],
-         [  0.        ,   4.33333333,  -4.33333333],
-         [  0.        ,   0.        ,   1.33333333]],
-        [[  1.33333333,  -6.33333333,   3.66666667],
-         [  0.        ,   8.33333333, -10.33333333],
-         [  0.        ,   0.        ,   3.33333333]]]
+        [[[3.33333333, -10.33333333,   3.66666667],
+         [0.,   8.33333333,  -6.33333333],
+         [0.,   0.,   1.33333333]],
+         [[1.33333333,  -4.33333333,   1.66666667],
+          [0.,   4.33333333,  -4.33333333],
+          [0.,   0.,   1.33333333]],
+         [[1.33333333,  -6.33333333,   3.66666667],
+          [0.,   8.33333333, -10.33333333],
+          [0.,   0.,   3.33333333]]]
     # Check for the correct answer on a uniform grid.
     beta = jiang_shu_smoothness_coefficients(3, [1, 2, 3, 4, 5, 6, 7])
     assert(np.testing.assert_almost_equal(beta[3], correct))

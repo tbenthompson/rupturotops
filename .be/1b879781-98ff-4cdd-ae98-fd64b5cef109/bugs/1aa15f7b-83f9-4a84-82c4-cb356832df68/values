@@ -1,0 +1,50 @@
+{
+
+
+
+
+
+
+    "creator": "Ben Thompson <t.ben.thompson@gmail.com>", 
+
+
+
+
+
+
+    "reporter": "Ben Thompson <t.ben.thompson@gmail.com>", 
+
+
+
+
+
+
+    "severity": "minor", 
+
+
+
+
+
+
+    "status": "open", 
+
+
+
+
+
+
+    "summary": "Investigate adaptive mesh refinement vs. wavelet collocation methods", 
+
+
+
+
+
+
+    "time": "Fri, 08 Nov 2013 04:01:07 +0000"
+
+
+
+
+
+
+}
