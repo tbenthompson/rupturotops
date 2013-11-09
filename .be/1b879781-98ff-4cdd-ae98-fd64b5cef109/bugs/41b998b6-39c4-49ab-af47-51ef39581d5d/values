@@ -26,21 +26,21 @@
 
 
 
-    "status": "closed", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Investigate adaptive mesh refinement vs. wavelet collocation methods", 
+    "summary": "Migrate towards a \\Cell\\ class that would put me into a position to ease into 2D", 
 
 
 
 
 
 
-    "time": "Fri, 08 Nov 2013 04:01:07 +0000"
+    "time": "Sat, 09 Nov 2013 02:23:48 +0000"
 
 
 
