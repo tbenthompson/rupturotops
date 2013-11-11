@@ -2,6 +2,8 @@ import numpy as np
 class RiemannSolver(object):
     """
     Really it's a Godunov flux
+
+    This interface could easily be used with a TVD flux too...
     """
     def __init__(self):
         pass

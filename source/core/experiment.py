@@ -2,7 +2,7 @@ import datetime
 import shutil
 import os
 import os.path
-from dolfin import MPI
+from mpi4py import MPI
 from core.data_controller import DataController, data_root
 from core.debug import _DEBUG
 assert(_DEBUG)
@@ -80,7 +80,7 @@ class Experiment(object):
         """
         if self.data_loc is not None:
             return
-        if MPI.process_number() is not 0:
+        if MPI.COMM_WORLD.Get_rank() is not 0:
             return
         folder_name = data_root + '/' + self.proj_name
         if not os.path.exists(folder_name):

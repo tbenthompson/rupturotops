@@ -12,7 +12,7 @@ import experiments.ssprk4 as ssprk4
 from experiments.weno import WENO
 from experiments.boundary_conds import PeriodicBC
 from experiments.riemann_solver import RiemannSolver
-from experiments.spatial_deriv import SpatialDeriv
+from experiments.spatial_deriv import SimpleFlux, GodunovDeriv
 
 
 class FVM(Experiment):
@@ -46,21 +46,26 @@ class FVM(Experiment):
         self.init = self.analytical(0.0)
         self.exact = self.analytical(self.t_max)
 
+        # Various
         self.riemann = RiemannSolver()
         self.bc = PeriodicBC()
         self.reconstructor = WENO(self.mesh)
-        self.spatial_deriv_obj = SpatialDeriv(self.mesh, self.reconstructor,
-                                  self.bc, self.riemann, self.v)
+        self.deriv = GodunovDeriv(self.reconstructor, self.riemann, self.v)
+        self.spatial_deriv_obj = SimpleFlux(self.mesh, self.bc, self.deriv)
 
     @staticmethod
     def calc_time_step(delta_x):
         return ssprk4.cfl_max * 0.9 * delta_x
 
     def _compute(self):
+        # Initialize the solver variables.
         result = self.init.copy()
+        # Find the necessary time-step (minimum of cell-specific time steps)
+        # Soon LTS will be implemented.
         dt = np.min(self.delta_t)
         t = dt
 
+        # Initialize the plots
         self.error_tracker = ErrorTracker(self.mesh,
                                           result, self.analytical, dt,
                                           self.params.error_tracker)
@@ -72,12 +77,17 @@ class FVM(Experiment):
         soln_plot.add_line(self.mesh.x, result, '+')
         soln_plot.add_line(self.mesh.x, self.init, '-')
 
+        # The main program loop
         while t <= self.t_max:
-            result = ssprk4.ssprk4(self.spatial_deriv_obj.compute, result, t, dt)
+            # We use a strong stability preserving runge kutta scheme.
+            result = ssprk4.ssprk4(self.spatial_deriv_obj.compute,
+                                   result, t, dt)
+            # Update the plots
             self.error_tracker.update(result, t)
             soln_plot.update(result, t)
             t += dt
 
+        # Finalize the plots
         soln_plot.update(result, 0)
         soln_plot.add_line(self.mesh.x, self.exact)
         return result

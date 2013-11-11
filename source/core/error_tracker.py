@@ -26,7 +26,7 @@ class ErrorTracker(object):
         self.exact_soln = exact
         # assumes t = 0 is the start!
         self.initial_error = ErrorTracker.calc_norm(init - exact(0),
-                                            self.error_norm)
+                                                    self.error_norm)
         self.error = [self.initial_error]
 
         self.current_plot = UpdatePlotter(delta_t, self.params_plotter)
@@ -41,23 +41,21 @@ class ErrorTracker(object):
             self.params_plotter = params.plotter
 
     @staticmethod
-    def calc_norm(vector, norm, delta_x=None):
+    def calc_norm(vector, norm):
         if norm is np.Inf:
             return abs(np.max(vector))
-        if delta_x is None:
-            delta_x = 1
-            denominator = len(vector)
-        else:
-            denominator = np.sum(delta_x)
-        err = (np.sum(abs(vector * delta_x) ** norm) / denominator) ** \
+        err = np.sum(abs(vector) ** norm) ** \
             (1.0 / norm)
         return err
+
+    def get_final_error(self):
+        return self.error[-1]
 
     def update(self, y, t):
         exact = self.exact_soln(t)
         diff = y - exact
         self.diff_old = diff
-        e = ErrorTracker.calc_norm(diff, self.error_norm, self.mesh.delta_x)
+        e = ErrorTracker.calc_norm(diff * self.mesh.delta_x, self.error_norm)
         self.error.append(e)
 
         self.current_plot.update(diff, t)
@@ -71,21 +69,14 @@ from core.mesh import Mesh
 
 
 def test_error_norm():
-    vec = np.linspace(0, 1, 3)
+    vec = np.linspace(0.0, 1.0, 3.0)
+    _DEBUG()
     l1 = ErrorTracker.calc_norm(vec, 1)
     l2 = ErrorTracker.calc_norm(vec, 2)
     linf = ErrorTracker.calc_norm(vec, np.Inf)
-    assert(l1 == 0.5)
-    assert(abs(l2 - (np.sqrt(1.25)/np.sqrt(3.0))) <= 1e-9)
+    assert(l1 == 1.5)
+    assert(abs(l2 - np.sqrt(1.25)) <= 1e-9)
     assert(linf == 1.0)
-
-
-def test_error_norm2():
-    vec = np.linspace(0, 1, 4)
-    delta_x = np.array([1.0, 0.1, 2.0, 1.0])
-    l1 = ErrorTracker.calc_norm(vec, 1, delta_x)
-    np.testing.assert_almost_equal(l1, 71.0 / (30.0 * 4.1))
-
 
 def test_error_tracker():
     delta_x = 0.01 * np.ones(100)

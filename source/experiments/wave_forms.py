@@ -4,8 +4,8 @@ def square(x):
     return np.where(np.logical_and(x <= 1.0, x >= 0.5),
                 np.ones_like(x), np.zeros_like(x))
 
-def gaussian(x, width=1.0):
-    return np.exp(-(x - 1.0) ** 2 * width)
+def gaussian(x, width=1.0, center=1.0):
+    return np.exp(-(x - center) ** 2 * width)
 
 def step(x):
     return np.where(x < 1.0,

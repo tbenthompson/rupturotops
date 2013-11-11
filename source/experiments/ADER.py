@@ -1,10 +1,14 @@
-import numpy as np
-
-class Derivator(object):
-    def __init__(self, bc, reconstructor, riemann):
+class ADERTime(object):
+    def __init__(self):
         pass
 
-    # @autojit()
+    def compute(self, t, now):
+        pass
+class ADERSpace(object):
+    """
+    This implements the time stepping and derivative computation
+    interfaces.
+    """
     def compute(self, t, now):
         now = self.bc.compute(t, now)
         recon_left = self.reconstructor.compute(now, 'left')
@@ -17,4 +21,4 @@ class Derivator(object):
         # minus the flux going out the left.
         leftwards_flux = -np.roll(rightwards_flux, -1)
         total_flux = rightwards_flux + leftwards_flux
-        return total_flux[2:-2] / self.delta_x
+        return total_flux[2:-2] / self.mesh.delta_x

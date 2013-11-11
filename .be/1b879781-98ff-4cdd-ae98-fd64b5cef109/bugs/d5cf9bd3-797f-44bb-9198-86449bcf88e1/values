@@ -26,21 +26,21 @@
 
 
 
-    "status": "wontfix", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Grab the 4th order linear optimal runge kutta from the gottlieb paper", 
+    "summary": "Migrate to virtualenv", 
 
 
 
 
 
 
-    "time": "Sun, 03 Nov 2013 09:02:37 +0000"
+    "time": "Mon, 11 Nov 2013 23:51:38 +0000"
 
 
 
