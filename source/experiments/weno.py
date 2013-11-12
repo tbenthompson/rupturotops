@@ -6,7 +6,6 @@ import scipy.io
 import matplotlib.pyplot as pyp
 from core.debug import _DEBUG
 import numpy as np
-# from numba import autojit
 
 import pyweno.weno
 from pyweno.nonuniform import reconstruction_coefficients, optimal_weights
@@ -45,10 +44,10 @@ class WENO_NEW2(object):
         self.order = order
         self.half_width = int((self.order + 1) / 2.0)
         padded_edges = self.mesh.extend_edges(self.half_width + 1)
-        self.coeffs = reconstruction_coefficients(3, [-1, 1],
+        self.coeffs = reconstruction_coefficients(3, [-1.0, 1.0],
                                                   padded_edges)
         self.coeffs = self.coeffs[self.half_width - 1:-self.half_width + 1]
-        self.weights = optimal_weights(3, [-1, 1], padded_edges)
+        self.weights = optimal_weights(3, [-1.0, 1.0], padded_edges)
         self.weights = self.weights[self.half_width - 1:-self.half_width + 1]
         self.smoothness = jiang_shu_smoothness_coefficients(3,
                                                             padded_edges)
@@ -75,7 +74,6 @@ class WENO_NEW2(object):
             small_polynomials = self.mult_with_coeffs(which_chunk,
                                                       which_coeffs)
             result.append(np.sum(weights * small_polynomials))
-        # _DEBUG(10)
         return np.array(result)
 
     def get_chunk(self, padded, center, reverse=False):

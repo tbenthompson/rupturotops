@@ -49,7 +49,7 @@ class FVM(Experiment):
         # Various
         self.riemann = RiemannSolver()
         self.bc = PeriodicBC()
-        self.reconstructor = WENO(self.mesh)
+        self.reconstructor = WENO_NEW2(self.mesh)
         self.deriv = GodunovDeriv(self.reconstructor, self.riemann, self.v)
         self.spatial_deriv_obj = SimpleFlux(self.mesh, self.bc, self.deriv)
 
@@ -151,7 +151,6 @@ def test_fvm_simple():
 
 # This test shouldn't work with the current WENO implementation because
 # the reconstruction requires uniformity in space
-@pytest.mark.xfail
 def test_fvm_varying_spacing():
     delta_x = []
     for i in range(100):
@@ -169,7 +168,7 @@ def _test_fvm_helper(wave, t_max, delta_x, error_bound):
     my_params = DataController()
     my_params.delta_x = delta_x
     my_params.plotter = DataController()
-    my_params.plotter.always_plot = False
+    my_params.plotter.always_plot = True
     my_params.plotter.never_plot = not interactive_test
     my_params.plotter.plot_interval = 0.5
     my_params.t_max = t_max

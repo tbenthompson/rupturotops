@@ -1,1 +1,1 @@
-py.test -vs --ignore "./ignore"
+py.test -vs --ignore "./experiments/fenics/"
