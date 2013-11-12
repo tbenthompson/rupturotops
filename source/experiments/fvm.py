@@ -9,7 +9,7 @@ from core.mesh import Mesh
 assert(_DEBUG)
 import experiments.wave_forms as wave_forms
 import experiments.ssprk4 as ssprk4
-from experiments.weno import WENO
+from experiments.weno import WENO, WENO_NEW2
 from experiments.boundary_conds import PeriodicBC
 from experiments.riemann_solver import RiemannSolver
 from experiments.spatial_deriv import SimpleFlux, GodunovDeriv
@@ -142,7 +142,7 @@ def test_analytical_periodicity():
 
 def test_fvm_boundaries():
     delta_x = 0.1 * np.ones(50)
-    _test_fvm_helper(wave_forms.square, 6.0, delta_x, 0.1)
+    _test_fvm_helper(wave_forms.square, 6.0, delta_x, 0.35)
 
 
 def test_fvm_simple():
@@ -150,7 +150,7 @@ def test_fvm_simple():
     _test_fvm_helper(wave_forms.sin_4, 2.0, delta_x, 0.05)
 
 # This test shouldn't work with the current WENO implementation because
-# the reconstruction is uniform in space
+# the reconstruction requires uniformity in space
 @pytest.mark.xfail
 def test_fvm_varying_spacing():
     delta_x = []

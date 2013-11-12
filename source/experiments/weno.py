@@ -9,8 +9,8 @@ import numpy as np
 # from numba import autojit
 
 import pyweno.weno
-from pyweno_nonuniform import reconstruction_coefficients, optimal_weights
-from pyweno_nonuniform import jiang_shu_smoothness_coefficients
+from pyweno.nonuniform import reconstruction_coefficients, optimal_weights
+from pyweno.nonuniform import jiang_shu_smoothness_coefficients
 
 
 class WENO(object):

@@ -70,7 +70,6 @@ from core.mesh import Mesh
 
 def test_error_norm():
     vec = np.linspace(0.0, 1.0, 3.0)
-    _DEBUG()
     l1 = ErrorTracker.calc_norm(vec, 1)
     l2 = ErrorTracker.calc_norm(vec, 2)
     linf = ErrorTracker.calc_norm(vec, np.Inf)

@@ -9,7 +9,7 @@ class ConvergenceTest(object):
     def __init__(self, params, domain_length):
         self.params = params
         self.domain_length = domain_length
-        self.dx_exp = -np.arange(1, 9)
+        self.dx_exp = -np.arange(1, 6)
         self.dx = 2.0 ** self.dx_exp
 
     def run(self):
