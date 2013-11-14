@@ -18,7 +18,7 @@ params.material = wetdiabase
 
 # Setup the solution domain, first we define the cell spacings
 delta_x = []
-for i in range(500):
+for i in range(1000):
     if i % 10 == 0:
         delta_x.append(0.002)
     else:
@@ -28,11 +28,11 @@ params.delta_x = np.array(delta_x)
 # plotting parameters
 params.plotter = DataController()
 params.plotter.always_plot = False
-params.plotter.never_plot = False
+params.plotter.never_plot = True
 params.plotter.plot_interval = 0.5
 
 
-params.t_max = 1.0
+params.t_max = 2.0
 params.analytical = wave_forms.sin_4
 
 # Define project and run parameters in order to save the results to

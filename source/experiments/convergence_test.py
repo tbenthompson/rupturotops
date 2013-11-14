@@ -21,10 +21,10 @@ class ConvergenceTest(object):
             fvm = FVM(self.params)
             fvm.compute()
             errors.append(fvm.error_tracker.get_final_error())
-        pyp.close('all')
-        pyp.figure()
-        pyp.plot(np.log(self.dx), np.log(errors))
-        pyp.show()
+        # pyp.close('all')
+        # pyp.figure()
+        # pyp.plot(np.log(self.dx), np.log(errors))
+        # pyp.show()
 
 def test_conv_test():
     my_params = DataController()
@@ -36,4 +36,4 @@ def test_conv_test():
     # my_params.analytical = lambda x: wave_forms.sin_4(x, 2 * np.pi * 4.0)
     my_params.analytical = lambda x: wave_forms.gaussian(x, 4.0, 2.5)
     ct = ConvergenceTest(my_params, 5.0)
-    ct.run()
+    # ct.run()

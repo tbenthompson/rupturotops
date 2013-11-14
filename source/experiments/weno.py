@@ -12,7 +12,7 @@ from pyweno.nonuniform import reconstruction_coefficients, optimal_weights
 from pyweno.nonuniform import jiang_shu_smoothness_coefficients
 import pyximport
 pyximport.install()
-import experiments.mult_with_smoothness
+import experiments.ext_weno as ext_weno
 
 
 class WENO(object):
@@ -72,46 +72,16 @@ def compute_helper(now, padded, half_width, side_index, coeffs, smoothness, weig
     cells = len(now)
     weights = weights[:, side_index]
     coeffs = coeffs[:, side_index]
-    beta = experiments.mult_with_smoothness.mult_with_smoothness(cells, half_width, padded, smoothness)
-    s_weights = scaled_weights(cells, half_width, eps, weights, beta)
-    small_polynomials = mult_with_coeffs(cells, half_width, padded, coeffs)
-    reconstruction = mult_polynomials(cells, half_width, s_weights, small_polynomials)
+    beta = ext_weno.mult_with_smoothness(cells, half_width,
+                                         padded, smoothness)
+    s_weights = ext_weno.scaled_weights(cells, half_width,
+                                        eps, weights, beta)
+    small_polynomials = ext_weno.mult_with_coeffs(cells, half_width,
+                                                  padded, coeffs)
+    reconstruction = ext_weno.mult_polynomials(cells, half_width,
+                                               s_weights, small_polynomials)
     return np.array(reconstruction)
 
-def mult_polynomials(cells, half_width, weights, small_polynomials):
-    reconstruction = [0.0 for row in range(cells)]
-    for i in range(cells):
-        for j in range(half_width):
-            reconstruction[i] += weights[i][j] * small_polynomials[i][j]
-    return reconstruction
-
-def scaled_weights(cells, half_width, eps, weights, beta):
-    scaled = [[0.0 for col in range(half_width)] for row in range(cells)]
-    sum = [0.0 for row in range(cells)]
-    for i in range(cells):
-        for j in range(half_width):
-            scaled[i][half_width - 1 - j] = weights[i][j] / \
-                ((eps + beta[i][half_width - 1 - j]) ** 2)
-            sum[i] += scaled[i][half_width - 1 - j]
-        if sum[i] == 0.0:
-            continue
-        for j in range(half_width):
-            scaled[i][j] /= sum[i]
-    return scaled
-
-def mult_with_coeffs(cells, half_width,  padded, coeffs):
-    retval = [[0.0 for col in range(half_width)] for row in range(cells)]
-    for i in range(cells):
-        center = half_width - 1 + i
-        for r in range(half_width):
-            #pyWENO does a weird flipping with its smoothness coefficients
-            #so we go backwards
-            for j in range(half_width):
-                #note that this result is in the backwards pyWENO form
-                #retval = [poly3, poly2, poly1] in the Shu 2009 notation
-                retval[i][half_width - 1 - r] += coeffs[i][r][j] *\
-                    padded[center - r + j]
-    return retval
 
 
 ##############################################################################
@@ -125,7 +95,7 @@ def test_weight_scaling():
     weights = np.array([[0.1, 0.6, 0.3]])
     beta = np.array([[1.0, 2.0, 1.0]])
     correct = np.array([[0.3/0.55, 0.15/0.55, 0.1/0.55]])
-    result = scaled_weights(1, 3,  1e-6, weights, beta)
+    result = ext_weno.scaled_weights(1, 3,  1e-6, weights, beta)
     np.testing.assert_almost_equal(np.sum(result), 1.0)
     np.testing.assert_almost_equal(result, correct, 5)
 
@@ -135,7 +105,7 @@ def test_mult_with_smoothness():
     # Shu 2009
     now_chunk = np.array([1.0, 2.0, 3.0, 4.0, 6.0])
     smoothness = \
-        [[[[  3.33333333, -10.33333333,   3.66666667],
+        np.array([[[[  3.33333333, -10.33333333,   3.66666667],
          [  0.        ,   8.33333333,  -6.33333333],
          [  0.        ,   0.        ,   1.33333333]],
         [[  1.33333333,  -4.33333333,   1.66666667],
@@ -143,11 +113,11 @@ def test_mult_with_smoothness():
          [  0.        ,   0.        ,   1.33333333]],
         [[  1.33333333,  -6.33333333,   3.66666667],
          [  0.        ,   8.33333333, -10.33333333],
-         [  0.        ,   0.        ,   3.33333333]]]]
+         [  0.        ,   0.        ,   3.33333333]]]])
     correct = \
         13.0 / 12.0 * np.array([[0.0, 0.0, 1.0]]) ** 2 + \
         1.0 / 4.0 * np.array([[2.0, -2.0, -1.0]]) ** 2
-    beta = mult_with_smoothness(1, 3, now_chunk, smoothness)
+    beta = ext_weno.mult_with_smoothness(1, 3, now_chunk, smoothness)
     np.testing.assert_almost_equal(beta, correct)
 
 
@@ -158,7 +128,7 @@ def test_mult_with_coeffs():
          [-0.16666667,  0.83333333,  0.33333333],
          [ 0.33333333, -1.16666667,  1.83333333]]])
     correct = np.array([[21.0/6.0, 21.0/6.0, 20.0/6.0]])
-    result = mult_with_coeffs(1, 3, now, coeffs)
+    result = ext_weno.mult_with_coeffs(1, 3, now, coeffs)
     np.testing.assert_almost_equal(result, correct)
 
 def test_weno_compare_hard():

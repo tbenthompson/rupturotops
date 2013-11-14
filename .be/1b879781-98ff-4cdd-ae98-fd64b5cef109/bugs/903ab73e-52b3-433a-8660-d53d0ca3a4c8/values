@@ -26,21 +26,21 @@
 
 
 
-    "status": "closed", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "speed up the nonuniform WENO a bit, try using numba", 
+    "summary": "Add \\visitor\\ system for data watching during execution", 
 
 
 
 
 
 
-    "time": "Wed, 13 Nov 2013 17:35:29 +0000"
+    "time": "Thu, 14 Nov 2013 18:01:03 +0000"
 
 
 

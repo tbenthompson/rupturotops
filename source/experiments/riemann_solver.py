@@ -46,11 +46,11 @@ class RiemannSolver(object):
 
 def test_riemann_solver_compute():
     v = np.array([1, 1, 1, 1, 1])
-    recon_left = np.array([0, 0, 1, 1, 0])
-    recon_right = np.array([0, 0, 1, 1, 0])
+    recon_left = lambda x: np.array([0, 0, 1, 1, 0])
+    recon_right = lambda x: np.array([0, 0, 1, 1, 0])
     correct = np.array([0, 0, 0, 1, 1])
     rs = RiemannSolver()
-    result = rs.compute(recon_left, recon_right, v)
+    result = rs.compute(recon_left, recon_right, [0,0,0,0,0], v)
     np.testing.assert_almost_equal(result, correct)
 
 
