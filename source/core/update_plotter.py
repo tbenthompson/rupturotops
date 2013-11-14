@@ -1,5 +1,6 @@
 from matplotlib import pyplot as pyp
 from core.data import Data
+from core.debug import _DEBUG
 assert(Data)
 
 
@@ -14,7 +15,7 @@ class UpdatePlotter(object):
         never_plot -- never plot!
     """
 
-    def __init__(self, delta_t, params=None):
+    def __init__(self, params=None):
         # Defaults
         self.always_plot = True
         self.plot_interval = -1
@@ -22,10 +23,12 @@ class UpdatePlotter(object):
         self.autoscale = True
         self.x_bounds = None
         self.y_bounds = None
-        self.delta_t = delta_t
 
         if params is not None:
             self.handle_params(params)
+
+        self.update_count = 0
+        self.since_last_update = 0.0
 
         self.fig = pyp.figure()
         self.ax = self.fig.add_subplot(111)
@@ -36,6 +39,7 @@ class UpdatePlotter(object):
         if self.never_plot is not True:
             self.fig.show()
         self.lines = []
+        self.first_plot = True
 
     def handle_params(self, params):
         if 'always_plot' in params:
@@ -55,12 +59,18 @@ class UpdatePlotter(object):
         self.lines.append(self.ax.plot(x, y, *plot_args)[0])
         return len(self.lines) - 1
 
-    def update(self, y, t, which_line=0, x=None):
-        do_we_plot = t / self.plot_interval
+    def init_plots(self):
+        pass
+
+    def update(self, y, t, dt, which_line=0, x=None):
+        self.since_last_update += dt
+        if self.first_plot is True:
+            self.init_plots()
+            self.first_plot = False
         if self.never_plot:
             return
         if (not self.always_plot) and \
-                abs(do_we_plot - round(do_we_plot)) > (self.delta_t / self.plot_interval):
+                self.since_last_update < self.plot_interval:
             return
         if x is not None:
             self.lines[which_line].set_xdata(x)
@@ -69,6 +79,8 @@ class UpdatePlotter(object):
             self.ax.relim()
             self.ax.autoscale_view(True, True, True)
         self.fig.canvas.draw()
+        self.update_count += 1
+        self.since_last_update = self.since_last_update - self.plot_interval
 
 #-----------------------------------------------------------------------------
 # TESTS --
@@ -84,15 +96,17 @@ def test_2_plotters():
     y = 1 - (x ** 2)
     y2 = x ** 3
 
-    plotter = UpdatePlotter(0.1, None)
+    param = Data(never_plot=False)
+    plotter = UpdatePlotter(param)
     plotter.add_line(x, y)
-    plotter.update(y2, 0)
+    plotter.update(y2, 0, 0.1)
     assert(plotter.lines[0].get_ydata()[50] == x[50] ** 3)
 
-    plotter2 = UpdatePlotter(0.1, Data())
+    plotter2 = UpdatePlotter(param)
     plotter2.add_line(x, y2, plot_args=['*'])
     plotter2.add_line(x, np.zeros_like(x))
-    plotter2.update(y, 1)
+    plotter2.update(y, 1, 0.1)
+    assert(plotter2.update_count == 1)
     assert(plotter2.lines[0].get_ydata()[50] == 1 - x[50] ** 2)
 
     assert(len(pyp.get_fignums()) == 2)

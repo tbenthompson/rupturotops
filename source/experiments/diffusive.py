@@ -72,6 +72,7 @@ class Diffusive(Experiment):
         pass
 
     def plot_temp_strainrate(self):
+        return
         host = host_subplot(111, axes_class=AA.Axes)
         pyp.subplots_adjust(right=0.75)
         par1 = host.twinx()
@@ -93,6 +94,7 @@ class Diffusive(Experiment):
         """
         Plots the log of the strain as a function of x and t using a colormap.
         """
+        return
         log_strain = np.log(self.data.strain[:, 1:])
         bounds = (self.data.t_domain[0], self.data.t_domain[-1],
                   self.data.x_domain[0], self.data.x_domain[-1])

@@ -85,6 +85,7 @@ class ShearHeating(Experiment):
         self.data.strain_time = scipy.integrate.simps(tointegrate.T, self.data.t)
 
     def _visualize(self):
+        return
         if self.params.plot_init_cond:
             self.plot_init_cond()
         if self.params.plot_temp_time:

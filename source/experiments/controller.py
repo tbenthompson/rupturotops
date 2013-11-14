@@ -52,10 +52,15 @@ class Controller(Experiment):
         reconstructor = WENO_NEW2(self.mesh)
         deriv = GodunovDeriv(reconstructor, riemann, self.v)
         self.spatial_deriv_obj = SimpleFlux(self.mesh, bc, deriv)
+        self.observers= []
 
     @staticmethod
     def calc_time_step(delta_x):
         return ssprk4.cfl_max * 0.9 * delta_x
+
+    def update_observers(self, result, t, dt):
+        for o in self.observers:
+            o.update(result, t, dt)
 
     def _compute(self):
         # Initialize the solver variables.
@@ -65,31 +70,15 @@ class Controller(Experiment):
         dt = np.min(self.delta_t)
         t = dt
 
-        # Initialize the plots
-        self.error_tracker = ErrorTracker(self.mesh,
-                                          result, self.analytical, dt,
-                                          self.params.error_tracker)
-        self.params.plotter.x_bounds = [self.mesh.left_edge,
-                                        self.mesh.right_edge]
-        self.params.plotter.y_bounds = [np.min(result), np.max(result)]
-        soln_plot = UpdatePlotter(dt, self.params.plotter)
-
-        soln_plot.add_line(self.mesh.x, result, '+')
-        soln_plot.add_line(self.mesh.x, self.init, '-')
-
         # The main program loop
         while t <= self.t_max:
             # We use a strong stability preserving runge kutta scheme.
             result = ssprk4.ssprk4(self.spatial_deriv_obj.compute,
                                    result, t, dt)
             # Update the plots
-            self.error_tracker.update(result, t)
-            soln_plot.update(result, t)
+            self.update_observers(result, t, dt)
             t += dt
 
-        # Finalize the plots
-        soln_plot.update(result, 0)
-        soln_plot.add_line(self.mesh.x, self.exact)
         return result
 
     @staticmethod
@@ -165,6 +154,13 @@ def test_controller_varying_spacing():
     _test_controller_helper(lambda x: wave_forms.sin_4(x, np.pi / 2.0),
                      2.0, delta_x, 0.1)
 
+def test_update_count():
+    delta_x = np.ones(10) * 0.2
+    et, sp = _test_controller_helper(wave_forms.square, 2.0, delta_x, 10.0)
+    assert(et.current_plot.update_count == (3 if interactive_test else 0))
+    assert(et.all_time_plot.update_count == (3 if interactive_test else 0))
+    assert(sp.update_count == (3 if interactive_test else 0))
+
 
 def _test_controller_helper(wave, t_max, delta_x, error_bound):
     # Simple test to make sure the code works right
@@ -176,17 +172,28 @@ def _test_controller_helper(wave, t_max, delta_x, error_bound):
     my_params.plotter.plot_interval = 0.5
     my_params.t_max = t_max
     my_params.analytical = wave
-    controller = Controller(my_params)
-    result = controller.compute()
+    cont = Controller(my_params)
+    et = ErrorTracker(cont.mesh, cont.analytical, my_params)
+
+    soln_plot = UpdatePlotter(my_params.plotter)
+
+    soln_plot.add_line(cont.mesh.x, cont.init, '+')
+    soln_plot.add_line(cont.mesh.x, cont.init, '-')
+    cont.observers.append(soln_plot)
+    cont.observers.append(et)
+    # cont.observers.append(up)
+    result = cont.compute()
+    soln_plot.add_line(cont.mesh.x, cont.exact)
 
     # check essentially non-oscillatoriness
     # total variation <= initial_tv + O(h^2)
-    init_tv = Controller.total_variation(controller.init)
+    init_tv = Controller.total_variation(cont.init)
     result_tv = Controller.total_variation(result)
     assert(result_tv < init_tv + error_bound)
 
     # check error
-    assert(controller.error_tracker.error[-1] < error_bound)
+    assert(et.error[-1] < error_bound)
 
     if interactive_test is True:
         pyp.show()
+    return et, soln_plot
