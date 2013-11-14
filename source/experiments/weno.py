@@ -61,6 +61,7 @@ class WENO_NEW2(object):
         self.smoothness = self.smoothness[self.half_width - 1:
                                           -self.half_width + 1]
         self.eps = 1e-6
+        self.padded = np.zeros(len(padded_edges) - 1)
 
     def compute(self, now, side):
         if side == 'left':
@@ -68,8 +69,8 @@ class WENO_NEW2(object):
         else: #side == 'right'
             side_index = 1
 
-        padded = np.pad(now, self.half_width - 1, 'constant')
-        return compute_helper(now, padded, self.half_width, side_index, self.coeffs,
+        self.padded[self.half_width - 1:-(self.half_width - 1)] = now
+        return compute_helper(now, self.padded, self.half_width, side_index, self.coeffs,
                               self.smoothness, self.weights, self.eps)
 
 def compute_helper(now, padded, half_width, side_index, coeffs, smoothness, weights, eps):
@@ -136,15 +137,15 @@ def test_mult_with_coeffs():
     np.testing.assert_almost_equal(result, correct)
 
 def test_weno_compare_hard():
-    y_harder = np.array([0.0, 0.0, 40.0, 0.0, 0.0])
+    y_harder = np.pad(np.array([0.0, 0.0, 40.0, 0.0, 0.0]), 2, 'constant')
     _test_weno_compare_helper(y_harder)
 
 def test_weno_compare_easy():
-    y_easy = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
+    y_easy = np.pad(np.array([1.0, 1.0, 1.0, 1.0, 1.0]), 2, 'constant')
     _test_weno_compare_helper(y_easy)
 
 def _test_weno_compare_helper(y):
-    dx = np.ones(len(y))
+    dx = np.ones(len(y) - 4)
     m = Mesh(dx)
     w1 = WENO(m)
     w2 = WENO_NEW2(m)
@@ -161,7 +162,7 @@ def _test_weno_compare_helper(y):
 
 def test_nonuniform_weno():
     dx = np.array([1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0])
-    y = np.array([2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0])
+    y = np.pad(np.array([2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0]), 2, 'constant')
     m = Mesh(dx)
     w1 = WENO(m)
     w2 = WENO_NEW2(m)
@@ -177,8 +178,8 @@ def test_higher_order_weno():
 
 
 def _test_weno_helper(x, y, filename):
-    weno = WENO_NEW2(Mesh((x - np.roll(x, 1))[1:]))
-    left_bdry = weno.compute(y, 'left')
+    weno = WENO_NEW2(Mesh((x - np.roll(x, 1))))
+    left_bdry = weno.compute(y, 'left')[2:-2]
     # unidirectional flow, so we only care about incoming from the left
     # and outgoing to the right
     # right_bdry = weno.compute(y, -1)
@@ -186,7 +187,7 @@ def _test_weno_helper(x, y, filename):
     dx = -(left_bdry - np.roll(left_bdry, -1))
     comp = scipy.io.loadmat(filename)
     y_exact = comp['fo']
-    np.testing.assert_almost_equal(y_exact[0], y)
+    np.testing.assert_almost_equal(y_exact[0], y[2:-2])
     if interactive_test:
         pyp.plot(dx.T)
         pyp.plot(comp['z'].T)
@@ -196,13 +197,13 @@ def _test_weno_helper(x, y, filename):
 
 def test_weno_more():
     x = np.linspace(-5, 5, 100)
-    y = np.where(x <= 0.0, np.ones_like(x), np.zeros_like(x))
+    y = np.pad(np.where(x <= 0.0, np.ones_like(x), np.zeros_like(x)), 2, 'constant')
     filename = data_root + '/test/test_weno_jumpy.mat'
     _test_weno_helper(x, y, filename)
 
 
 def test_weno_smooth():
     x = np.linspace(-5, 5, 100)
-    y = np.exp(-x ** 2)
+    y = np.pad(np.exp(-x ** 2), 2, 'constant')
     filename = data_root + '/test/test_weno_smooth.mat'
     _test_weno_helper(x, y, filename)

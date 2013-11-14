@@ -26,21 +26,21 @@
 
 
 
-    "status": "closed", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Remove the np.pad calls, they are slow", 
+    "summary": "Generalize the order of the scheme", 
 
 
 
 
 
 
-    "time": "Thu, 14 Nov 2013 18:11:44 +0000"
+    "time": "Thu, 14 Nov 2013 22:20:07 +0000"
 
 
 

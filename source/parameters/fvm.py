@@ -32,7 +32,7 @@ params.plotter.never_plot = True
 params.plotter.plot_interval = 0.5
 
 
-params.t_max = 2.0
+params.t_max = 200.0
 params.analytical = wave_forms.sin_4
 
 # Define project and run parameters in order to save the results to

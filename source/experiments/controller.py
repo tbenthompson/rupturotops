@@ -22,6 +22,30 @@ class Controller(Experiment):
         self.temp_analytical = wave_forms.square
         self.v = 1.0
         self.delta_x = 0.01 * np.ones(100)
+        self.handle_params()
+
+
+        self.mesh = Mesh(self.delta_x)
+        self.delta_t = Controller.calc_time_step(self.delta_x)
+
+        self.params.delta_t = self.delta_t
+
+        self.analytical = lambda t: self.temp_analytical(
+            (self.mesh.x - t) % self.mesh.domain_width)
+        self.v = np.pad(np.ones_like(self.mesh.x), 2, 'edge')
+        self.init = np.pad(self.analytical(0.0), 2, 'constant')
+        self.exact = self.analytical(self.t_max)
+
+        # Various
+        riemann = RiemannSolver()
+        bc = PeriodicBC()
+        reconstructor = WENO_NEW2(self.mesh)
+        deriv = GodunovDeriv(reconstructor, riemann, self.v)
+        self.spatial_deriv_obj = SimpleFlux(self.mesh, bc, deriv)
+        self.observers= []
+
+
+    def handle_params(self):
         if 'plotter' not in self.params:
             self.params.plotter = None
         if 'error_tracker' not in self.params:
@@ -35,24 +59,6 @@ class Controller(Experiment):
         if 'delta_x' in self.params:
             self.delta_x = self.params.delta_x
 
-        self.mesh = Mesh(self.delta_x)
-        self.delta_t = Controller.calc_time_step(self.delta_x)
-
-        self.params.delta_t = self.delta_t
-
-        self.analytical = lambda t: self.temp_analytical(
-            (self.mesh.x - t) % self.mesh.domain_width)
-        self.v = np.pad(np.ones_like(self.mesh.x), 2, 'edge')
-        self.init = self.analytical(0.0)
-        self.exact = self.analytical(self.t_max)
-
-        # Various
-        riemann = RiemannSolver()
-        bc = PeriodicBC()
-        reconstructor = WENO_NEW2(self.mesh)
-        deriv = GodunovDeriv(reconstructor, riemann, self.v)
-        self.spatial_deriv_obj = SimpleFlux(self.mesh, bc, deriv)
-        self.observers= []
 
     @staticmethod
     def calc_time_step(delta_x):
@@ -76,7 +82,7 @@ class Controller(Experiment):
             result = ssprk4.ssprk4(self.spatial_deriv_obj.compute,
                                    result, t, dt)
             # Update the plots
-            self.update_observers(result, t, dt)
+            self.update_observers(result[2:-2], t, dt)
             t += dt
 
         return result
@@ -177,8 +183,8 @@ def _test_controller_helper(wave, t_max, delta_x, error_bound):
 
     soln_plot = UpdatePlotter(my_params.plotter)
 
-    soln_plot.add_line(cont.mesh.x, cont.init, '+')
-    soln_plot.add_line(cont.mesh.x, cont.init, '-')
+    soln_plot.add_line(cont.mesh.x, cont.init[2:-2], '+')
+    soln_plot.add_line(cont.mesh.x, cont.init[2:-2], '-')
     cont.observers.append(soln_plot)
     cont.observers.append(et)
     # cont.observers.append(up)
@@ -187,7 +193,7 @@ def _test_controller_helper(wave, t_max, delta_x, error_bound):
 
     # check essentially non-oscillatoriness
     # total variation <= initial_tv + O(h^2)
-    init_tv = Controller.total_variation(cont.init)
+    init_tv = Controller.total_variation(cont.init[2:-2])
     result_tv = Controller.total_variation(result)
     assert(result_tv < init_tv + error_bound)
 

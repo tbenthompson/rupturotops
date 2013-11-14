@@ -9,12 +9,21 @@ class RiemannSolver(object):
     This interface could easily be used with a TVD flux too...
     """
 
-    def __init__(self):
+    def __init__(self, assume_constant_v=True):
+        self.assume_constant_v = assume_constant_v
         pass
 
     def split_velocity(self, v):
-        rightwards = np.where(v > 0, v, 0)
-        leftwards = np.roll(-np.where(v < 0, v, 0), -1)
+        if self.assume_constant_v:
+            if v[0] > 0:
+                rightwards = v
+                leftwards = np.zeros_like(v)
+            if v[0] < 0:
+                leftwards = v
+                rightwards = np.zeros_like(v)
+        else:
+            rightwards = np.where(v > 0, v, 0)
+            leftwards = np.roll(-np.where(v < 0, v, 0), -1)
         return rightwards, leftwards
 
     def compute(self, recon_left, recon_right, now, v):
@@ -22,11 +31,11 @@ class RiemannSolver(object):
         if not np.all(leftwards_v == 0.0):
             left_edge_u = leftwards_v * recon_left(now)
         else:
-            left_edge_u = np.array([0.0] * len(now))
+            left_edge_u = np.zeros(len(now))
         if not np.all(rightwards_v == 0.0):
             right_edge_u = rightwards_v * recon_right(now)
         else:
-            right_edge_u = np.array([0.0] * len(now))
+            right_edge_u = np.zeros(len(now))
 
         # For solving a Riemann problem, the zeroth
         # order contribution to the flux should be the difference
@@ -56,7 +65,7 @@ def test_riemann_solver_compute():
 
 def test_split_vel():
     v = np.array([1, -1, 1])
-    rs = RiemannSolver()
+    rs = RiemannSolver(assume_constant_v=False)
     right, left = rs.split_velocity(v)
     assert((left == [1, 0, 0]).all())
     assert((right == [1, 0, 1]).all())
