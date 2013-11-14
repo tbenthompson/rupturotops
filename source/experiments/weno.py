@@ -1,6 +1,5 @@
 """
-This functionality is currently on indefinite hold in
-favor of the TVD flux implementation of ADER schemes
+Implements WENO reconstruction for finite volume methods.
 """
 import scipy.io
 import matplotlib.pyplot as pyp
@@ -20,6 +19,9 @@ class WENO(object):
     """
     Produces an arbitrary order weno reconstruction using the pyWENO
     package. Only works properly for uniform mesh spacings.
+
+    May run marginally faster than the WENO_NEW2 class for cases where
+    only uniform mesh spacings are necessary.
     """
 
     def __init__(self, mesh, order=5):
@@ -35,9 +37,11 @@ class WENO(object):
 class WENO_NEW2(object):
 
     """
-    Produces arbitrary order weno reconstruction. But, does it by first
-    storing the coefficients. Prefered to WENO because then derivatives
-    and other operations can be performed on the coefficients.
+    Produces arbitrary order weno reconstruction(actually, currently
+    only produces 5th order WENO) on nonuniform meshes.
+
+    Does it by first storing the coefficients. Prefered to WENO because derivatives
+    can be performed easily on the coefficients.
 
     Uses the pyWENO nonuniform interface.
     """
@@ -87,7 +91,7 @@ def compute_helper(now, padded, half_width, side_index, coeffs, smoothness, weig
 ##############################################################################
 # TESTS BELOW HERE
 ##############################################################################
-from core.data_controller import data_root
+from core.data import data_root
 from core.mesh import Mesh
 interactive_test = False
 

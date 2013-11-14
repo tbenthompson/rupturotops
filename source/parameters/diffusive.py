@@ -1,10 +1,10 @@
-from core.data_controller import DataController
+from core.data import Data
 import numpy as np
 from material import wetdiabase
 from experiments.diffusive import Diffusive
 from core.constants import consts
 
-params = DataController()
+params = Data()
 params.material = wetdiabase
 params.proj_name = 'diffusive'
 params.run_name = 'test'

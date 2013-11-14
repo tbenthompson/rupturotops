@@ -1,5 +1,5 @@
 import numpy as np
-from core.data_controller import DataController
+from core.data import Data
 from core.debug import _DEBUG
 assert(_DEBUG)
 from core.update_plotter import UpdatePlotter
@@ -81,9 +81,9 @@ def test_error_tracker():
     delta_x = 0.01 * np.ones(100)
     y = np.linspace(0.01, 1.01, 100)
     exact = lambda t: np.linspace(0, 1, 100) + t
-    params = DataController()
+    params = Data()
     params.error_norm = 1
-    params.plotter = DataController()
+    params.plotter = Data()
     params.plotter.never_plot = True
     e1 = ErrorTracker(Mesh(delta_x), y, exact, 1.0, params)
     params.error_norm = 2

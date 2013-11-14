@@ -3,7 +3,7 @@ This file contains general tests that didn't fit well in some other file
 """
 
 from core.experiment import Experiment
-from core.data_controller import DataController
+from core.data import Data
 
 class TestExperiment(Experiment):
     def _initialize(self):
@@ -16,7 +16,7 @@ class TestExperiment(Experiment):
     def _visualize(self):
         self.visualized = True
 
-params = DataController(bar=1)
+params = Data(bar=1)
 experiment = TestExperiment
 
 def test_run():

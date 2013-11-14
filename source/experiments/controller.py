@@ -15,7 +15,7 @@ from experiments.riemann_solver import RiemannSolver
 from experiments.spatial_deriv import SimpleFlux, GodunovDeriv
 
 
-class FVM(Experiment):
+class Controller(Experiment):
 
     def _initialize(self):
         self.t_max = 1.0
@@ -26,7 +26,7 @@ class FVM(Experiment):
             self.params.plotter = None
         if 'error_tracker' not in self.params:
             # Default to using the same parameters as the main plotter
-            self.params.error_tracker = DataController(plotter=
+            self.params.error_tracker = Data(plotter=
                                                        self.params.plotter)
         if 't_max' in self.params:
             self.t_max = self.params.t_max
@@ -36,7 +36,7 @@ class FVM(Experiment):
             self.delta_x = self.params.delta_x
 
         self.mesh = Mesh(self.delta_x)
-        self.delta_t = FVM.calc_time_step(self.delta_x)
+        self.delta_t = Controller.calc_time_step(self.delta_x)
 
         self.params.delta_t = self.delta_t
 
@@ -47,11 +47,11 @@ class FVM(Experiment):
         self.exact = self.analytical(self.t_max)
 
         # Various
-        self.riemann = RiemannSolver()
-        self.bc = PeriodicBC()
-        self.reconstructor = WENO_NEW2(self.mesh)
-        self.deriv = GodunovDeriv(self.reconstructor, self.riemann, self.v)
-        self.spatial_deriv_obj = SimpleFlux(self.mesh, self.bc, self.deriv)
+        riemann = RiemannSolver()
+        bc = PeriodicBC()
+        reconstructor = WENO_NEW2(self.mesh)
+        deriv = GodunovDeriv(reconstructor, riemann, self.v)
+        self.spatial_deriv_obj = SimpleFlux(self.mesh, bc, deriv)
 
     @staticmethod
     def calc_time_step(delta_x):
@@ -103,58 +103,58 @@ class FVM(Experiment):
 #----------------------------------------------------------------------------
 # TESTS
 #----------------------------------------------------------------------------
-from core.data_controller import DataController
+from core.data import Data
 interactive_test = False
 
 
 def test_total_variaton():
     a = [1, 0, 1, 1, 1]
-    assert(FVM.total_variation(a) == 2.0)
+    assert(Controller.total_variation(a) == 2.0)
 
 
 def test_init_cond():
-    params = DataController()
+    params = Data()
     params.delta_x = 0.1 * np.ones(50)
     params.analytical = wave_forms.square
-    fvm = FVM(params)
-    assert(fvm.init[0] == 0.0)
-    assert(fvm.init[-1] == 0.0)
+    controller = Controller(params)
+    assert(controller.init[0] == 0.0)
+    assert(controller.init[-1] == 0.0)
 
 
 def test_time_step():
     delta_x = 1.0
-    assert(FVM.calc_time_step(delta_x) <= ssprk4.cfl_max)
+    assert(Controller.calc_time_step(delta_x) <= ssprk4.cfl_max)
 
 
 def test_mesh_initialize():
-    params = DataController()
+    params = Data()
     params.delta_x = np.array([0.5, 1.0, 0.1, 2.0])
-    fvm = FVM(params)
+    controller = Controller(params)
     correct = np.array([0.25, 1.0, 1.55, 2.6])
-    assert(fvm.mesh.domain_width == 3.6)
-    assert(len(fvm.mesh.x) == 4)
-    assert((fvm.mesh.x == correct).all())
-    assert((np.min(fvm.delta_t) <= 0.1 * ssprk4.cfl_max))
+    assert(controller.mesh.domain_width == 3.6)
+    assert(len(controller.mesh.x) == 4)
+    assert((controller.mesh.x == correct).all())
+    assert((np.min(controller.delta_t) <= 0.1 * ssprk4.cfl_max))
 
 
 def test_analytical_periodicity():
-    fvm = FVM()
-    np.testing.assert_almost_equal(fvm.analytical(fvm.mesh.domain_width),
-                                   fvm.analytical(0.0))
+    controller = Controller()
+    np.testing.assert_almost_equal(controller.analytical(controller.mesh.domain_width),
+                                   controller.analytical(0.0))
 
 
-def test_fvm_boundaries():
+def test_controller_boundaries():
     delta_x = 0.1 * np.ones(50)
-    _test_fvm_helper(wave_forms.square, 6.0, delta_x, 0.35)
+    _test_controller_helper(wave_forms.square, 6.0, delta_x, 0.35)
 
 
-def test_fvm_simple():
+def test_controller_simple():
     delta_x = 0.005 * np.ones(200)
-    _test_fvm_helper(wave_forms.sin_4, 2.0, delta_x, 0.05)
+    _test_controller_helper(wave_forms.sin_4, 2.0, delta_x, 0.05)
 
 # This test shouldn't work with the current WENO implementation because
 # the reconstruction requires uniformity in space
-def test_fvm_varying_spacing():
+def test_controller_varying_spacing():
     delta_x = []
     for i in range(100):
         if i % 2 == 0:
@@ -162,31 +162,31 @@ def test_fvm_varying_spacing():
         else:
             delta_x.append(0.1)
     delta_x = np.array(delta_x)
-    _test_fvm_helper(lambda x: wave_forms.sin_4(x, np.pi / 2.0),
+    _test_controller_helper(lambda x: wave_forms.sin_4(x, np.pi / 2.0),
                      2.0, delta_x, 0.1)
 
 
-def _test_fvm_helper(wave, t_max, delta_x, error_bound):
+def _test_controller_helper(wave, t_max, delta_x, error_bound):
     # Simple test to make sure the code works right
-    my_params = DataController()
+    my_params = Data()
     my_params.delta_x = delta_x
-    my_params.plotter = DataController()
+    my_params.plotter = Data()
     my_params.plotter.always_plot = False
     my_params.plotter.never_plot = not interactive_test
     my_params.plotter.plot_interval = 0.5
     my_params.t_max = t_max
     my_params.analytical = wave
-    fvm = FVM(my_params)
-    result = fvm.compute()
+    controller = Controller(my_params)
+    result = controller.compute()
 
     # check essentially non-oscillatoriness
     # total variation <= initial_tv + O(h^2)
-    init_tv = FVM.total_variation(fvm.init)
-    result_tv = FVM.total_variation(result)
+    init_tv = Controller.total_variation(controller.init)
+    result_tv = Controller.total_variation(result)
     assert(result_tv < init_tv + error_bound)
 
     # check error
-    assert(fvm.error_tracker.error[-1] < error_bound)
+    assert(controller.error_tracker.error[-1] < error_bound)
 
     if interactive_test is True:
         pyp.show()

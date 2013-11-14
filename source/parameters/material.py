@@ -1,8 +1,8 @@
-from core.data_controller import DataController
+from core.data import Data
 
 #ALL IN STANDARD SI UNITS
 # all values here come from the wet diabase in takeuchi, fialko
-wetdiabase = DataController()
+wetdiabase = Data()
 wetdiabase.density = 2850.0  # kg/m^3
 wetdiabase.specific_heat = 1000.0  # J/kgK
 wetdiabase.activation_energy = 2.6e5  # J/mol

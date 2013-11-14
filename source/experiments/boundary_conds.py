@@ -1,5 +1,5 @@
 import numpy as np
-from core.data_controller import DataController
+from core.data import Data
 
 class PeriodicBC(object):
     def __init__(self):

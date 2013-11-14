@@ -1,3 +1,7 @@
+"""
+This Cython extension provides the bulk of the computation for
+WENO reconstructions. It is optimized to a certain degree.
+"""
 import numpy as np
 import cython
 

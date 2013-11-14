@@ -1,6 +1,6 @@
 from matplotlib import pyplot as pyp
-from core.data_controller import DataController
-assert(DataController)
+from core.data import Data
+assert(Data)
 
 
 class UpdatePlotter(object):
@@ -89,7 +89,7 @@ def test_2_plotters():
     plotter.update(y2, 0)
     assert(plotter.lines[0].get_ydata()[50] == x[50] ** 3)
 
-    plotter2 = UpdatePlotter(0.1, DataController())
+    plotter2 = UpdatePlotter(0.1, Data())
     plotter2.add_line(x, y2, plot_args=['*'])
     plotter2.add_line(x, np.zeros_like(x))
     plotter2.update(y, 1)

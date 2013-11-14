@@ -3,7 +3,7 @@ import shutil
 import os
 import os.path
 from mpi4py import MPI
-from core.data_controller import DataController, data_root
+from core.data import Data, data_root
 from core.debug import _DEBUG
 assert(_DEBUG)
 
@@ -24,7 +24,7 @@ class Experiment(object):
     or not
     """
 
-    def __init__(self, params=DataController()):
+    def __init__(self, params=Data()):
         self.proj_name = 'test'
         self.run_name = 'test'
         if 'proj_name' in params:
@@ -35,7 +35,7 @@ class Experiment(object):
             self.material = params.material
 
         self.params = params
-        self.data = DataController()
+        self.data = Data()
         self.data_loc = None
 
         self._assign_data_location()
@@ -70,7 +70,7 @@ class Experiment(object):
         self.data.save(self.data_loc + '/data.pkl')
 
     def load(self, filename):
-        self.data = DataController.load(filename)
+        self.data = Data.load(filename)
 
     def _assign_data_location(self):
         """
@@ -112,7 +112,7 @@ class ExperimentTester(Experiment):
 
 
 def test_experiment():
-    foo = ExperimentTester(DataController(bar = 1))
+    foo = ExperimentTester(Data(bar = 1))
     assert foo.params.bar == 1
     foo.compute()
     assert foo.data.abc == 1

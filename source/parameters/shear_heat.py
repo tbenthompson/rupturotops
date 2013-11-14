@@ -1,10 +1,10 @@
-from core.data_controller import DataController
+from core.data import Data
 from core.constants import consts
 from material import wetdiabase
 import numpy as np
 from experiments.shear_heating import ShearHeating
 
-params = DataController()
+params = Data()
 params.material = wetdiabase
 params.x_points = 101  # must be odd
 params.x = np.linspace(-20000, 20000, params.x_points)  # meters

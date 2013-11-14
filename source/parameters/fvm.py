@@ -1,5 +1,5 @@
-from core.data_controller import DataController
-from experiments.fvm import FVM
+from core.data import Data
+from experiments.controller import Controller
 from parameters.material import wetdiabase
 from core.constants import consts
 from experiments import wave_forms
@@ -9,7 +9,7 @@ assert(_DEBUG)
 import numpy as np
 
 # Define the standard parameter data structure.
-params = DataController()
+params = Data()
 
 # What material should we use? Look in the parameters/material file
 # to see the options and to see how to define a new material.
@@ -26,7 +26,7 @@ for i in range(1000):
 params.delta_x = np.array(delta_x)
 
 # plotting parameters
-params.plotter = DataController()
+params.plotter = Data()
 params.plotter.always_plot = False
 params.plotter.never_plot = True
 params.plotter.plot_interval = 0.5
@@ -41,4 +41,4 @@ params.proj_name = 'fvm'
 params.run_name = 'development'
 
 # Define the set of experiments to be run
-experiment = FVM
+experiment = Controller

@@ -5,7 +5,7 @@ import cPickle
 data_root = '/home/tbent/projects/viscosaur/data'
 
 
-class DataController(dict):
+class Data(dict):
     """
     The class extends the python dictionary to support using friendlier syntax:
         data.key = value
@@ -18,19 +18,19 @@ class DataController(dict):
         self.update(*args, **kwargs)
 
     def __getitem__(self, key):
-        return super(DataController,
+        return super(Data,
                      self).__getitem__(key)
 
     def __setitem__(self, key, value):
-        return super(DataController,
+        return super(Data,
                      self).__setitem__(key, value)
 
     def __delitem__(self, key):
-        return super(DataController,
+        return super(Data,
                      self).__delitem__(key)
 
     def __contains__(self, key):
-        return super(DataController,
+        return super(Data,
                      self).__contains__(key)
 
     def __getattr__(self, attr):
@@ -45,7 +45,7 @@ class DataController(dict):
         inst_dict = vars(self).copy()
         # Throw away all the variables that exist for the bare class
         # where no parameters have been set. We just want to save parameters.
-        for k in vars(DataController()):
+        for k in vars(Data()):
             inst_dict.pop(k, None)
         if inst_dict:
             return (self.__class__, (items,), inst_dict)
@@ -70,23 +70,23 @@ class DataController(dict):
 test_file = data_root + '/test/data'
 
 
-def test_data_controller_in():
-    a = DataController(bcd=1)
+def test_data_in():
+    a = Data(bcd=1)
     exists = 'bcd' in a
     assert exists is True
     exists = 'ghi' in a
     assert exists is False
 
 
-def test_data_controller_init():
-    b = DataController([('a', 1)])
+def test_data_init():
+    b = Data([('a', 1)])
     assert b.a == 1
-    c = DataController(foo='bar')
+    c = Data(foo='bar')
     assert c.foo == 'bar'
 
 
-def test_data_controller_access():
-    d = DataController()
+def test_data_access():
+    d = Data()
     d['abc'] = 1
     assert d.abc == 1
 
@@ -97,26 +97,26 @@ def test_data_controller_access():
 def test_data_save():
     if os.path.exists(test_file):
         os.remove(test_file)
-    d = DataController()
+    d = Data()
     d.abc = 1
-    d.defghi = DataController()
+    d.defghi = Data()
     d.defghi.abc = 2
     d.save(test_file)
     assert(os.path.exists(test_file))
 
 
 def test_data_load():
-    d = DataController()
+    d = Data()
     d.abc = 1
     d.save(test_file)
-    e = DataController.load(test_file)
+    e = Data.load(test_file)
     assert(e.abc == 1)
 
     d.abc = 2
-    d.defghi = DataController()
+    d.defghi = Data()
     d.defghi.abc = 3
     d.save(test_file)
-    e = DataController.load(test_file)
+    e = Data.load(test_file)
     assert(e.abc == 2)
     assert(e.defghi.abc == 3)
 
@@ -124,5 +124,5 @@ def test_data_load():
 def test_real_parameters():
     from parameters.material import wetdiabase
     wetdiabase.save(test_file)
-    new = DataController.load(test_file)
+    new = Data.load(test_file)
     assert(new.activation_energy == wetdiabase.activation_energy)

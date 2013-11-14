@@ -1,8 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as pyp
-from core.data_controller import DataController
+from core.data import Data
 import experiments.wave_forms as wave_forms
-from experiments.fvm import FVM
+from experiments.controller import Controller
 from core.debug import _DEBUG
 
 class ConvergenceTest(object):
@@ -18,17 +18,17 @@ class ConvergenceTest(object):
             print self.dx[i]
             delta_x = np.ones(self.domain_length / self.dx[i]) * self.dx[i]
             self.params.delta_x = delta_x
-            fvm = FVM(self.params)
-            fvm.compute()
-            errors.append(fvm.error_tracker.get_final_error())
+            cont = Controller(self.params)
+            cont.compute()
+            errors.append(cont.error_tracker.get_final_error())
         # pyp.close('all')
         # pyp.figure()
         # pyp.plot(np.log(self.dx), np.log(errors))
         # pyp.show()
 
 def test_conv_test():
-    my_params = DataController()
-    my_params.plotter = DataController()
+    my_params = Data()
+    my_params.plotter = Data()
     my_params.plotter.always_plot = False
     my_params.plotter.never_plot = True
     my_params.plotter.plot_interval = 0.5
