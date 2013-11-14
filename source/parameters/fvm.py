@@ -2,6 +2,7 @@ from core.data_controller import DataController
 from experiments.fvm import FVM
 from parameters.material import wetdiabase
 from core.constants import consts
+from experiments import wave_forms
 assert(consts)
 from core.debug import _DEBUG
 assert(_DEBUG)
@@ -14,20 +15,25 @@ params = DataController()
 # to see the options and to see how to define a new material.
 params.material = wetdiabase
 
-# The length of time for which to run the simulation.
-params.t_max = 100.0
 
 # Setup the solution domain, first we define the cell spacings
-params.delta_x = np.ones(101) * 0.1
+delta_x = []
+for i in range(500):
+    if i % 10 == 0:
+        delta_x.append(0.002)
+    else:
+        delta_x.append(0.004)
+params.delta_x = np.array(delta_x)
 
-# and then we define the cell positions by summing the spacings.
-# params.x = positions_from_spacing(params.delta_x)
+# plotting parameters
+params.plotter = DataController()
+params.plotter.always_plot = False
+params.plotter.never_plot = False
+params.plotter.plot_interval = 0.5
 
-# Set the timestep based on the CFL condition
-# Wave speed 1.0
-c = 1.0
-CFL_approx = 0.5
-params.delta_t = CFL_approx * params.delta_x / c
+
+params.t_max = 1.0
+params.analytical = wave_forms.sin_4
 
 # Define project and run parameters in order to save the results to
 # the proper data folder.

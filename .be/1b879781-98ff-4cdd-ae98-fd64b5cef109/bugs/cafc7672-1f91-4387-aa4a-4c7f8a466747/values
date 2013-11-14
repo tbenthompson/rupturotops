@@ -26,21 +26,21 @@
 
 
 
-    "status": "closed", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Implement coefficient-based WENO", 
+    "summary": "fix nonuniform gridding at the boundary", 
 
 
 
 
 
 
-    "time": "Mon, 04 Nov 2013 06:44:43 +0000"
+    "time": "Wed, 13 Nov 2013 16:45:47 +0000"
 
 
 

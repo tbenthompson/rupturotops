@@ -97,6 +97,9 @@ class FVM(Experiment):
         # add a zero padding
         return np.sum(abs(a - np.roll(a, 1)))
 
+    def _visualize(self):
+        pass
+
 #----------------------------------------------------------------------------
 # TESTS
 #----------------------------------------------------------------------------
@@ -168,7 +171,7 @@ def _test_fvm_helper(wave, t_max, delta_x, error_bound):
     my_params = DataController()
     my_params.delta_x = delta_x
     my_params.plotter = DataController()
-    my_params.plotter.always_plot = True
+    my_params.plotter.always_plot = False
     my_params.plotter.never_plot = not interactive_test
     my_params.plotter.plot_interval = 0.5
     my_params.t_max = t_max

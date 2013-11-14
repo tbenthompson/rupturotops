@@ -7,11 +7,12 @@ class GodunovDeriv(object):
         self.riemann = riemann
 
     def compute(self, t, now):
-        recon_left = self.reconstructor.compute(now, 'left')
-        recon_right = self.reconstructor.compute(now, 'right')
+        recon_left = lambda data: self.reconstructor.compute(data, 'left')
+        recon_right = lambda data: self.reconstructor.compute(data, 'right')
 
         rightwards_flux = self.riemann.compute(recon_left,
                                                recon_right,
+                                               now,
                                                self.v)
         return rightwards_flux
 
