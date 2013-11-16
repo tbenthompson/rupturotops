@@ -27,10 +27,14 @@ class WENO(object):
     def __init__(self, mesh, order=5):
         self.order = order
         self.half_width = int((self.order + 1) / 2.0)
+        self.padded = None
 
     def compute(self, now, direc):
-        padded = np.pad(now, self.half_width, 'constant')
-        retval = pyweno.weno.reconstruct(padded, self.order, direc)
+        if self.padded is None:
+            self.padded = np.pad(now, self.half_width, 'constant')
+        else:
+            self.padded[3:-3] = now
+        retval = pyweno.weno.reconstruct(self.padded, self.order, direc)
         return retval[self.half_width:-self.half_width]
 
 

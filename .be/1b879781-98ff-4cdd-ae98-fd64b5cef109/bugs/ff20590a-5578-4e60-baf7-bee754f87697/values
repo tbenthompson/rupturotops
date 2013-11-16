@@ -26,21 +26,21 @@
 
 
 
-    "status": "closed", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "fix nonuniform gridding at the boundary", 
+    "summary": "Extract Analytical into its own object", 
 
 
 
 
 
 
-    "time": "Wed, 13 Nov 2013 16:45:47 +0000"
+    "time": "Sat, 16 Nov 2013 01:44:08 +0000"
 
 
 

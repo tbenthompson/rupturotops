@@ -13,10 +13,10 @@ class PeriodicBC(object):
     def extend_dx(self, dx):
         out = np.zeros(len(dx) + 4)
         out[2:-2] = dx
-        out[0] = out[-4]
+        out[0] = out[-3]
         out[1] = out[-3]
         out[-2] = out[2]
-        out[-1] = out[3]
+        out[-1] = out[2]
         return out
 
     def compute(self, t, now):

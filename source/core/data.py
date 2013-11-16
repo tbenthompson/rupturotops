@@ -1,6 +1,7 @@
 import os
 import os.path
 import cPickle
+from cloud.serialization.cloudpickle import dump
 
 data_root = '/home/tbent/projects/viscosaur/data'
 
@@ -54,7 +55,7 @@ class Data(dict):
     def save(self, filename):
         #binary mode is important for pickling
         with open(filename, 'wb') as f:
-            cPickle.dump(self, f)
+            dump(self, f)
 
     @staticmethod
     def load(filename):

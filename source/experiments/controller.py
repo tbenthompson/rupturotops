@@ -26,9 +26,6 @@ class Controller(Experiment):
 
 
         self.mesh = Mesh(self.delta_x)
-        self.delta_t = Controller.calc_time_step(self.delta_x)
-
-        self.params.delta_t = self.delta_t
 
         self.analytical = lambda t: self.temp_analytical(
             (self.mesh.x - t) % self.mesh.domain_width)
@@ -36,12 +33,15 @@ class Controller(Experiment):
         self.init = np.pad(self.analytical(0.0), 2, 'constant')
         self.exact = self.analytical(self.t_max)
 
-        # Various
-        riemann = RiemannSolver()
-        bc = PeriodicBC()
-        reconstructor = WENO_NEW2(self.mesh)
-        deriv = GodunovDeriv(reconstructor, riemann, self.v)
-        self.spatial_deriv_obj = SimpleFlux(self.mesh, bc, deriv)
+        # We use a strong stability preserving runge kutta scheme.
+
+        # The pieces of a finite volume scheme
+        self.timestepper = ssprk4.SSPRK4()
+        self.riemann = RiemannSolver()
+        self.bc = PeriodicBC()
+        self.reconstructor = WENO_NEW2(self.mesh)
+        self.flux = GodunovDeriv(self.reconstructor, self.riemann, self.v)
+        self.spatial_deriv_obj = SimpleFlux(self.mesh, self.bc, self.flux)
         self.observers= []
 
 
@@ -59,11 +59,6 @@ class Controller(Experiment):
         if 'delta_x' in self.params:
             self.delta_x = self.params.delta_x
 
-
-    @staticmethod
-    def calc_time_step(delta_x):
-        return ssprk4.cfl_max * 0.9 * delta_x
-
     def update_observers(self, result, t, dt):
         for o in self.observers:
             o.update(result, t, dt)
@@ -71,20 +66,20 @@ class Controller(Experiment):
     def _compute(self):
         # Initialize the solver variables.
         result = self.init.copy()
-        # Find the necessary time-step (minimum of cell-specific time steps)
-        # Soon LTS will be implemented.
-        dt = np.min(self.delta_t)
-        t = dt
 
+        # Assumes v is constant
+        dt = self.timestepper.get_dt(self.v[0], np.min(self.mesh.delta_x))
+        t = 0
         # The main program loop
         while t <= self.t_max:
-            # We use a strong stability preserving runge kutta scheme.
-            result = ssprk4.ssprk4(self.spatial_deriv_obj.compute,
+            result = self.timestepper.compute(self.spatial_deriv_obj.compute,
                                    result, t, dt)
+            t += dt
             # Update the plots
             self.update_observers(result[2:-2], t, dt)
-            t += dt
 
+        #final update
+        self.update_observers(result[2:-2], t, dt)
         return result
 
     @staticmethod
@@ -116,11 +111,6 @@ def test_init_cond():
     assert(controller.init[-1] == 0.0)
 
 
-def test_time_step():
-    delta_x = 1.0
-    assert(Controller.calc_time_step(delta_x) <= ssprk4.cfl_max)
-
-
 def test_mesh_initialize():
     params = Data()
     params.delta_x = np.array([0.5, 1.0, 0.1, 2.0])
@@ -129,7 +119,6 @@ def test_mesh_initialize():
     assert(controller.mesh.domain_width == 3.6)
     assert(len(controller.mesh.x) == 4)
     assert((controller.mesh.x == correct).all())
-    assert((np.min(controller.delta_t) <= 0.1 * ssprk4.cfl_max))
 
 
 def test_analytical_periodicity():
@@ -147,8 +136,8 @@ def test_controller_simple():
     delta_x = 0.005 * np.ones(200)
     _test_controller_helper(wave_forms.sin_4, 2.0, delta_x, 0.05)
 
-# This test shouldn't work with the current WENO implementation because
-# the reconstruction requires uniformity in space
+# This test should only work the newer WENO setup because
+# the reconstruction is nonuniform in space
 def test_controller_varying_spacing():
     delta_x = []
     for i in range(100):
@@ -157,8 +146,9 @@ def test_controller_varying_spacing():
         else:
             delta_x.append(0.1)
     delta_x = np.array(delta_x)
-    _test_controller_helper(lambda x: wave_forms.sin_4(x, np.pi / 2.0),
-                     2.0, delta_x, 0.1)
+    width = np.sum(delta_x)
+    _test_controller_helper(lambda x: wave_forms.sin_4(x, np.pi / width),
+                     5.0, delta_x, 0.15)
 
 def test_update_count():
     delta_x = np.ones(10) * 0.2
@@ -168,12 +158,12 @@ def test_update_count():
     assert(sp.update_count == (3 if interactive_test else 0))
 
 
-def _test_controller_helper(wave, t_max, delta_x, error_bound):
+def _test_controller_helper(wave, t_max, delta_x, error_bound, always=False):
     # Simple test to make sure the code works right
     my_params = Data()
     my_params.delta_x = delta_x
     my_params.plotter = Data()
-    my_params.plotter.always_plot = False
+    my_params.plotter.always_plot = always
     my_params.plotter.never_plot = not interactive_test
     my_params.plotter.plot_interval = 0.5
     my_params.t_max = t_max
