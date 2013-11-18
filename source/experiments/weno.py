@@ -30,7 +30,10 @@ class WENO(object):
         self.half_width = int((self.order + 1) / 2.0)
         self.padded = None
 
-    def compute(self, now, direc):
+    def compute(self, now, direc, d=0):
+        if d is not 0:
+            raise Exception('WENO unable to calculate non-zero derivative. '
+                            'Use WENO_NEW2')
         if self.padded is None:
             self.padded = np.pad(now, self.half_width, 'constant')
         else:

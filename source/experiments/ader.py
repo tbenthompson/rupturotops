@@ -35,7 +35,7 @@ def test_ader():
         cont.timestepper = ADERTime()
         pass
     _test_controller_helper(lambda x: wave_forms.sin_4(x, 5 * np.pi / width),
-                            200.0, delta_x, 0.05, setup_callback=callback)
+                            2.0, delta_x, 0.05, setup_callback=callback)
 
 if __name__ == "__main__":
     test_ader()

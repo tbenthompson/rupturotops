@@ -26,21 +26,21 @@
 
 
 
-    "status": "closed", 
+    "status": "open", 
 
 
 
 
 
 
-    "summary": "Implement ADER", 
+    "summary": "Consider combining the SpatialDeriv/Godunov/Riemann stuff into one class.", 
 
 
 
 
 
 
-    "time": "Thu, 14 Nov 2013 18:02:26 +0000"
+    "time": "Mon, 18 Nov 2013 02:14:33 +0000"
 
 
 

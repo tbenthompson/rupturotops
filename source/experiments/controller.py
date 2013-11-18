@@ -11,8 +11,7 @@ import experiments.wave_forms as wave_forms
 import experiments.ssprk4 as ssprk4
 from experiments.weno import WENO, WENO_NEW2
 from experiments.boundary_conds import PeriodicBC
-from experiments.riemann_solver import RiemannSolver
-from experiments.spatial_deriv import SimpleFlux, GodunovDeriv
+from experiments.spatial_deriv import SimpleFlux
 
 
 class Controller(Experiment):
@@ -24,26 +23,22 @@ class Controller(Experiment):
         self.delta_x = 0.01 * np.ones(100)
         self.handle_params()
 
-
         self.mesh = Mesh(self.delta_x)
 
         self.analytical = lambda t: self.temp_analytical(
             (self.mesh.x - t) % self.mesh.domain_width)
         self.v = np.pad(np.ones_like(self.mesh.x), 2, 'edge')
-        self.init = np.pad(self.analytical(0.0), 2, 'constant')
+        self.init = self.analytical(0.0)
         self.exact = self.analytical(self.t_max)
 
         # We use a strong stability preserving runge kutta scheme.
 
         # The pieces of a finite volume scheme
         self.timestepper = ssprk4.SSPRK4()
-        self.riemann = RiemannSolver()
         self.bc = PeriodicBC()
         self.reconstructor = WENO_NEW2(self.mesh)
-        self.flux = GodunovDeriv(self.reconstructor, self.riemann, self.v)
-        self.spatial_deriv_obj = SimpleFlux(self.mesh, self.bc, self.flux)
-        self.observers= []
-
+        self.spatial_deriv_obj = SimpleFlux(self.reconstructor, self.v, self.mesh, self.bc)
+        self.observers = []
 
     def handle_params(self):
         if 'plotter' not in self.params:
@@ -51,7 +46,7 @@ class Controller(Experiment):
         if 'error_tracker' not in self.params:
             # Default to using the same parameters as the main plotter
             self.params.error_tracker = Data(plotter=
-                                                       self.params.plotter)
+                                             self.params.plotter)
         if 't_max' in self.params:
             self.t_max = self.params.t_max
         if 'analytical' in self.params:
@@ -72,14 +67,15 @@ class Controller(Experiment):
         t = 0
         # The main program loop
         while t <= self.t_max:
-            result = self.timestepper.compute(self.spatial_deriv_obj.compute,
-                                   result, t, dt)
+            result = self.timestepper.compute(
+                self.spatial_deriv_obj.compute,
+                result, t, dt)
             t += dt
             # Update the plots
-            self.update_observers(result[2:-2], t, dt)
+            self.update_observers(result, t, dt)
 
-        #final update
-        self.update_observers(result[2:-2], t, dt)
+        # final update
+        self.update_observers(result, t, dt)
         return result
 
     @staticmethod
@@ -94,7 +90,7 @@ class Controller(Experiment):
 # TESTS
 #----------------------------------------------------------------------------
 from core.data import Data
-interactive_test = True
+interactive_test = False
 
 
 def test_total_variaton():
@@ -123,8 +119,9 @@ def test_mesh_initialize():
 
 def test_analytical_periodicity():
     controller = Controller()
-    np.testing.assert_almost_equal(controller.analytical(controller.mesh.domain_width),
-                                   controller.analytical(0.0))
+    np.testing.assert_almost_equal(
+        controller.analytical(controller.mesh.domain_width),
+        controller.analytical(0.0))
 
 
 def test_controller_boundaries():
@@ -138,6 +135,8 @@ def test_controller_simple():
 
 # This test should only work the newer WENO setup because
 # the reconstruction is nonuniform in space
+
+
 def test_controller_varying_spacing():
     delta_x = []
     for i in range(100):
@@ -148,7 +147,8 @@ def test_controller_varying_spacing():
     delta_x = np.array(delta_x)
     width = np.sum(delta_x)
     _test_controller_helper(lambda x: wave_forms.sin_4(x, np.pi / width),
-                     5.0, delta_x, 0.15)
+                            5.0, delta_x, 0.15)
+
 
 def test_update_count():
     delta_x = np.ones(10) * 0.2
@@ -176,8 +176,8 @@ def _test_controller_helper(wave, t_max, delta_x, error_bound, always=False,
 
     soln_plot = UpdatePlotter(my_params.plotter)
 
-    soln_plot.add_line(cont.mesh.x, cont.init[2:-2], '+')
-    soln_plot.add_line(cont.mesh.x, cont.init[2:-2], '-')
+    soln_plot.add_line(cont.mesh.x, cont.init, '+')
+    soln_plot.add_line(cont.mesh.x, cont.init, '-')
     cont.observers.append(soln_plot)
     cont.observers.append(et)
     result = cont.compute()
@@ -185,7 +185,7 @@ def _test_controller_helper(wave, t_max, delta_x, error_bound, always=False,
 
     # check essentially non-oscillatoriness
     # total variation <= initial_tv + O(h^2)
-    init_tv = Controller.total_variation(cont.init[2:-2])
+    init_tv = Controller.total_variation(cont.init)
     result_tv = Controller.total_variation(result)
     assert(result_tv < init_tv + error_bound)
 
