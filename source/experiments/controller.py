@@ -68,7 +68,7 @@ class Controller(Experiment):
         result = self.init.copy()
 
         # Assumes v is constant
-        dt = self.timestepper.get_dt(self.v[0], np.min(self.mesh.delta_x))
+        dt = self.timestepper.get_dt(self.v[0], self.mesh.delta_x)
         t = 0
         # The main program loop
         while t <= self.t_max:
@@ -94,7 +94,7 @@ class Controller(Experiment):
 # TESTS
 #----------------------------------------------------------------------------
 from core.data import Data
-interactive_test = False
+interactive_test = True
 
 
 def test_total_variaton():
@@ -158,7 +158,8 @@ def test_update_count():
     assert(sp.update_count == (3 if interactive_test else 0))
 
 
-def _test_controller_helper(wave, t_max, delta_x, error_bound, always=False):
+def _test_controller_helper(wave, t_max, delta_x, error_bound, always=False,
+                            setup_callback=None):
     # Simple test to make sure the code works right
     my_params = Data()
     my_params.delta_x = delta_x
@@ -169,6 +170,8 @@ def _test_controller_helper(wave, t_max, delta_x, error_bound, always=False):
     my_params.t_max = t_max
     my_params.analytical = wave
     cont = Controller(my_params)
+    if setup_callback is not None:
+        setup_callback(cont)
     et = ErrorTracker(cont.mesh, cont.analytical, my_params)
 
     soln_plot = UpdatePlotter(my_params.plotter)
@@ -177,7 +180,6 @@ def _test_controller_helper(wave, t_max, delta_x, error_bound, always=False):
     soln_plot.add_line(cont.mesh.x, cont.init[2:-2], '-')
     cont.observers.append(soln_plot)
     cont.observers.append(et)
-    # cont.observers.append(up)
     result = cont.compute()
     soln_plot.add_line(cont.mesh.x, cont.exact)
 

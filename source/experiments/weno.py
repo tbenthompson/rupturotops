@@ -7,8 +7,9 @@ from core.debug import _DEBUG
 import numpy as np
 
 import pyweno.weno
-from pyweno.nonuniform import reconstruction_coefficients, optimal_weights
-from pyweno.nonuniform import jiang_shu_smoothness_coefficients
+from pyweno.nonuniform import reconstruction_coefficients as rc
+from pyweno.nonuniform import optimal_weights as ow
+from pyweno.nonuniform import jiang_shu_smoothness_coefficients as sc
 import pyximport
 pyximport.install()
 import experiments.ext_weno as ext_weno
@@ -50,32 +51,41 @@ class WENO_NEW2(object):
     Uses the pyWENO nonuniform interface.
     """
 
-    def __init__(self, mesh, order=5):
+    def __init__(self, mesh, order=5, get_derivs=True):
         self.mesh = mesh
         self.order = order
         self.half_width = int((self.order + 1) / 2.0)
         padded_edges = self.mesh.extend_edges(self.half_width + 1)
-        self.coeffs = reconstruction_coefficients(3, [-1.0, 1.0],
-                                                  padded_edges)
-        self.coeffs = self.coeffs[self.half_width - 1:-self.half_width + 1]
-        self.weights = optimal_weights(3, [-1.0, 1.0], padded_edges)
+
+        self.init_coeffs(get_derivs, padded_edges)
+        self.weights = ow(3, [-1.0, 1.0], padded_edges)
         self.weights = self.weights[self.half_width - 1:-self.half_width + 1]
-        self.smoothness = jiang_shu_smoothness_coefficients(3,
-                                                            padded_edges)
+        self.smoothness = sc(3, padded_edges)
         self.smoothness = self.smoothness[self.half_width - 1:
                                           -self.half_width + 1]
         self.eps = 1e-6
         self.padded = np.zeros(len(padded_edges) - 1)
 
-    def compute(self, now, side):
+    def init_coeffs(self, get_derivs, padded_edges):
+        self.coeffs = []
+        for i in range(3):
+            if i > 0 and not get_derivs:
+                break
+            # rc is "reconstruction_coefficients" from pyweno.nonuniform
+            temp_coeffs = rc(3, [-1.0, 1.0], padded_edges, d=i)
+            self.coeffs.append(temp_coeffs[self.half_width - 1:
+                                           -self.half_width + 1])
+
+    def compute(self, now, side, d=0):
         if side == 'left':
             side_index = 0
         else: #side == 'right'
             side_index = 1
 
         self.padded[self.half_width - 1:-(self.half_width - 1)] = now
-        return compute_helper(now, self.padded, self.half_width, side_index, self.coeffs,
-                              self.smoothness, self.weights, self.eps)
+        return compute_helper(now, self.padded, self.half_width,
+                              side_index, self.coeffs[d], self.smoothness,
+                              self.weights, self.eps)
 
 def compute_helper(now, padded, half_width, side_index, coeffs, smoothness, weights, eps):
     cells = len(now)
@@ -99,6 +109,12 @@ def compute_helper(now, padded, half_width, side_index, coeffs, smoothness, weig
 from core.data import data_root
 from core.mesh import Mesh
 interactive_test = False
+
+def test_weno_derivs():
+    dx = np.ones(5)
+    m = Mesh(dx)
+    w = WENO_NEW2(m, get_derivs=True)
+    print "test_weno_derivs: EXPAND THIS TEST"
 
 def test_weight_scaling():
     weights = np.array([[0.1, 0.6, 0.3]])
