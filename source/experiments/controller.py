@@ -31,8 +31,6 @@ class Controller(Experiment):
         self.init = self.analytical(0.0)
         self.exact = self.analytical(self.t_max)
 
-        # We use a strong stability preserving runge kutta scheme.
-
         # The pieces of a finite volume scheme
         self.timestepper = ssprk4.SSPRK4()
         self.bc = PeriodicBC()
