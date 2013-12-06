@@ -1,0 +1,43 @@
+from core.data import Data
+from projection.controller import ProjController
+from parameters.material import wetdiabase
+from core.constants import consts
+
+params = Data()
+
+#what material to use
+params.material = wetdiabase
+
+#time stepping
+params.delta_t = 0.5 * consts.secs_in_a_year
+params.t_max = 5.0 * consts.secs_in_a_year
+
+#grid descriptors
+params.x_min = -1.0e4
+params.x_max = 1.0e4
+params.y_min = 0
+params.y_max = 1.5e4
+params.x_points = 200
+params.y_points = 200
+
+#initial temp description
+params.background_temp = 960.0
+params.temp_pulse_size = 0.0  # kelvins
+
+#temperature source function
+params.plate_rate = (40.0 / 1.0e3) / consts.secs_in_a_year  # 40 mm/yr
+params.source_friction_coeff = 0.005
+params.source_term = params.source_friction_coeff * \
+    params.material.shear_modulus * \
+    params.plate_rate
+
+#initial stress setup
+params.initial_stress = 100.0e6
+params.fault_slip = 2.0
+params.fault_depth = 1.0e4
+
+#administrative stuff -- where to store files?
+params.proj_name = 'test'
+params.run_name = 'shear_heating'
+
+experiment = ProjController
