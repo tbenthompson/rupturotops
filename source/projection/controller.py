@@ -46,14 +46,22 @@ class ProjController(Experiment):
         """
         Use the elastic half-space stress solution from Segall (2010)
         """
+        # TEST THIS!
         factor = (s * self.material.shear_modulus) / (2 * np.pi)
         main_term = -(y - D) / ((y - D) ** 2 + x ** 2)
         image_term = (y + D) / ((y + D) ** 2 + x ** 2)
-        sigma_zx = -factor * (main_term + image_term)
+        sigma_zx = factor * (main_term + image_term)
 
-        main_term = x / (x ** 2 + (y - D))
-        image_term = -x / (x ** 2 + (y + D))
+        main_term = x / (x ** 2 + (y - D) ** 2)
+        image_term = -x / (x ** 2 + (y + D) ** 2)
         sigma_zy = factor * (main_term + image_term)
+        # pyp.figure(1)
+        # pyp.imshow(np.log(np.abs(sigma_zy)))
+        # pyp.colorbar()
+        # pyp.figure(2)
+        # pyp.imshow(np.log(np.abs(sigma_zx)))
+        # pyp.colorbar()
+        # pyp.show()
         return sigma_zx, sigma_zy
 
     def setup_momentum_eqtn(self):
@@ -66,8 +74,6 @@ class ProjController(Experiment):
             self.X, self.Y, self.params.fault_slip, self.params.fault_depth)
         self.initialSzx = self.Szx.copy()
         self.initialSzy = self.Szy.copy()
-        self.Szx_mod = np.zeros_like(self.Szx)
-        self.Szy_mod = np.zeros_like(self.Szy)
         # pyp.imshow(np.log(self.stress))
         # pyp.show()
         # backend = 'dopri5'
@@ -89,9 +95,10 @@ class ProjController(Experiment):
         return np.sqrt(Szx ** 2 + Szy ** 2)
 
     def inv_eff_visc(self, Szx, Szy, temp):
-        retval = self.material.creep_constant * \
-            self.eff_stress(Szx, Szy) ** (self.material.stress_exponent - 1) * \
-            dfn.exp(-(self.material.activation_energy / consts.R) / temp)
+        retval = 1.0 / 5e19
+        # retval = self.material.creep_constant * \
+        #     self.eff_stress(Szx, Szy) ** (self.material.stress_exponent - 1) * \
+        #     dfn.exp(-(self.material.activation_energy / consts.R) / temp)
         return retval
 
     def update_momentum(self, t, dt):
@@ -102,17 +109,13 @@ class ProjController(Experiment):
         internal_dt = dt / 100.0
         while internal_t < t + dt:
             dSzx, dSzy = self.deriv_momentum(
-                internal_t, self.Szx + self.Szx_mod,
-                self.Szy + self.Szy_mod)
-            deltaSzx = internal_dt * dSzx
-            deltaSzy = internal_dt * dSzy
-            self.Szx_mod += deltaSzx
-            self.Szy_mod += deltaSzy
+                internal_t, self.Szx, self.Szy)
+            self.Szx += internal_dt * dSzx
+            self.Szy += internal_dt * dSzy
             internal_t += internal_dt
             # sol.append([self.stress_solver.t, self.stress_solver.y])
             # print("Time: " + str(internal_t))
             # print("Stress: " + str(deltaSzx))
-        pyp.plot(self.X_, self.Szx[25, :] + self.Szx_mod[25, :])
         # self.stress = sol[-1][1]
         # warnings.resetwarnings()
 
@@ -182,18 +185,45 @@ class ProjController(Experiment):
         dt = self.params.delta_t
         t = dt
         t_max = self.params.t_max
+        pyp.figure(1)
+        pyp.plot(self.X_, self.Szx[25, :])
+        pyp.figure(2)
+        pyp.plot(self.Y_, self.Szy[25, :])
         while t <= t_max:
             self.update_momentum(t, dt)
-            # self.vel_solver.update(t, dt, self.Szx + self.Szx_mod, self.Szy + self.Szy_mod)
+            # pyp.imshow(self.Szy)
+            # pyp.show()
+            dvdx, dvdy = self.vel_solver.update(t, dt, self.Szx, self.Szy)
+            # pyp.plot(self.X_, self.Szx[25, :] + self.Szx_mod[25, :])
+            # pyp.show()
+            self.Szx += self.material.shear_modulus * dt * dvdx
+            self.Szy += self.material.shear_modulus * dt * dvdy
+            print np.mean(np.mean(self.Szx))
+            # pyp.plot(self.X_, dvdx[25, :])
+            # pyp.show()
+            # pyp.plot(self.X_, dvdy[25, :])
+            # pyp.show()
+            # pyp.imshow(self.Szx_mod)
+            # pyp.show()
+            # pyp.show()
             # solver.solve()
             # self.temp_old.assign(self.temp_)
             # dfn.plot(self.temp_)
             # print(np.max(self.temp_.vector().array()))
             t += dt
+            pyp.figure(1)
+            pyp.plot(self.X_, self.Szx[25, :])
+            pyp.figure(2)
+            pyp.plot(self.Y_, self.Szy[25, :])
         pyp.show()
 
     def _visualize(self):
         # pyp.plot(dfn.interpolate(self.initial_temp, self.fnc_space).vector().array())
+        from linear_viscoelastic.constant_slip_maxwell import solution
+        beta = self.params.shear_modulus * (1.0 / 5e19)
+        u_3 = solution(self.X, self.params.t_max / beta, self.params.fault_depth,
+                       self.params.fault_depth, self.params.fault_slip)
+        _DEBUG()
         # pyp.plot(self.temp_.vector().array())
-        pyp.imshow(np.log(self.Szx + self.Szx_mod)
+        pyp.imshow(np.log(self.Szx))
         pyp.show()

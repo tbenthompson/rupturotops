@@ -54,22 +54,30 @@ class VelocitySolver():
 
         a = dfn.inner(dfn.nabla_grad(self.velocity),
                       dfn.nabla_grad(self.velocity_test)) * dfn.dx
+        # a = dfn.inner(self.velocity,
+        #               self.velocity_test) * dfn.dx
         self.vel_f = dfn.Function(self.vec_fnc_space)
         self.vel_L = dfn.nabla_div(self.vel_f) * self.velocity_test * dfn.dx
         # assemble only once, before the time stepping
         self.vel_A = dfn.assemble(a)
 
-    def update(self, t, dt, Szx, Szy):
-        factor = 1 / (self.material.shear_modulus * dt)
-        # Complex reordering to get in the preferred FeNICs forms.
+    def convert_stress_to_fenics(self, factor, Szx, Szy):
         Szx_flat = factor * Szx.reshape((self.params.x_points * self.params.y_points, 1))
         Szy_flat = factor * Szy.reshape((self.params.x_points * self.params.y_points, 1))
-        # z = np.zeros((self.params.x_points * self.params.y_points, 1))
         array = np.concatenate((Szx_flat, Szy_flat), 1).flatten()
-        _DEBUG(1)
         self.vel_f.vector()[:] = array[
             self.vec_fnc_space.dofmap().vertex_to_dof_map(self.mesh)]
-        dfn.plot(self.vel_f)
+
+        # test it
+        re_extracted_orig = self.vel_f.vector()[self.vec_fnc_space.dofmap().dof_to_vertex_map(self.mesh)].\
+                   array().reshape((self.params.x_points, self.params.y_points, 2))[:, :, 0]
+        assert(np.sum(np.sum(np.abs(re_extracted_orig - factor * Szx))) == 0)
+
+    def update(self, t, dt, Szx, Szy):
+        factor = 1 / (self.material.shear_modulus * dt)
+        self.convert_stress_to_fenics(factor, Szx, Szy)
+        # Complex reordering to get in the preferred FeNICs forms.
+        # z = np.zeros((self.params.x_points * self.params.y_points, 1))
 
         b = dfn.assemble(self.vel_L)
         self.vel_bc_left.apply(self.vel_A, b)
@@ -79,5 +87,22 @@ class VelocitySolver():
         dfn.solve(self.vel_A, u.vector(), b)
         extracted_soln = u.vector()[self.fnc_space.dofmap().dof_to_vertex_map(self.mesh)].\
             array().reshape((self.params.x_points, self.params.y_points))
-        pyp.imshow(extracted_soln)
-        pyp.show()
+        # pyp.show()
+        # I still need to onvert back to the change in stress. This should be
+        # equal to s_n+1 = s_n + (dt * mu) * grad(v)
+        padded_soln = np.pad(extracted_soln, 1, 'edge')
+        dvdx = (np.roll(padded_soln, -1, 1) - np.roll(padded_soln, 1, 1)) / \
+            (2 * self.params.delta_x)
+        dvdy = (np.roll(padded_soln, -1, 0) - np.roll(padded_soln, 1, 0)) / \
+            (2 * self.params.delta_y)
+        # pyp.figure(1)
+        # pyp.imshow(padded_soln)
+        # pyp.colorbar()
+        # pyp.figure(2)
+        # pyp.imshow(dvdx[1:-1,1:-1])
+        # pyp.colorbar()
+        # pyp.figure(3)
+        # pyp.imshow(dvdy[1:-1,1:-1])
+        # pyp.colorbar()
+        # pyp.show()
+        return np.pad(dvdx[2:-2,2:-2], 1, 'edge'), dvdy[1:-1,1:-1]

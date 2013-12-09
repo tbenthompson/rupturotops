@@ -2,6 +2,7 @@ from core.data import Data
 from projection.controller import ProjController
 from parameters.material import wetdiabase
 from core.constants import consts
+from core.debug import _DEBUG
 
 params = Data()
 
@@ -9,23 +10,26 @@ params = Data()
 params.material = wetdiabase
 
 #time stepping
-params.delta_t = 0.5 * consts.secs_in_a_year
-params.t_max = 5.0 * consts.secs_in_a_year
+params.delta_t = 5.0 * consts.secs_in_a_year
+params.t_max = 90.0 * consts.secs_in_a_year
 
 #grid descriptors
 params.x_min = -1.0e4
 params.x_max = 1.0e4
-params.y_min = 0
+params.y_min = 0.0
 params.y_max = 1.5e4
-params.x_points = 200
-params.y_points = 200
+params.x_points = 30
+params.y_points = 30
+params.delta_x = (params.x_max - params.x_min) / params.x_points
+params.delta_y = (params.y_max - params.y_min) / params.y_points
+
 
 #initial temp description
 params.background_temp = 960.0
 params.temp_pulse_size = 0.0  # kelvins
 
 #temperature source function
-params.plate_rate = (40.0 / 1.0e3) / consts.secs_in_a_year  # 40 mm/yr
+params.plate_rate = 0.0#(40.0 / 1.0e3) / consts.secs_in_a_year  # 40 mm/yr
 params.source_friction_coeff = 0.005
 params.source_term = params.source_friction_coeff * \
     params.material.shear_modulus * \
