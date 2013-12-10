@@ -1,26 +1,45 @@
-from math import pi,factorial   
+from math import pi, factorial
 import numpy as np
 
-#displacements
+# displacements
 
-#all the functions for the maxwell viscoelastic solution in segall
-def _F(x, D, H, n):
-    retval = np.arctan((2*x*D)/(x**2 + (2*n*H)**2 - D**2))
+# all the functions for the maxwell viscoelastic solution in segall
+
+
+def _surface_G(x, D, H):
+    return np.arctan(D / x)
+
+
+def _surface_F(x, D, H, n):
+    retval = np.arctan((2 * x * D) / (x ** 2 + (2 * n * H) ** 2 - D ** 2))
     # print retval
     return retval
 
-def _E(time_scale,n):
+
+def _E(time_scale, n):
     retval = 0
-    for j in range(1, n+1):
+    for j in range(1, n + 1):
         # print str(j) + " " + str(n)
         # print time_scale
-        retval += ((time_scale)**(n-j))/factorial(n-j)
+        retval += ((time_scale) ** (n - j)) / factorial(n - j)
     return retval
 
-def solution(x, time_scale, depth_of_fault, H, slip):
+
+def surface_solution(x, t, t_r, D, H, s, length_of_sum=20):
     u_3 = 0
-    for i in range(20):
-        u_3 += (1 - (np.exp(-time_scale) * _E(time_scale,i+1))) * _F(x, depth_of_fault, H, i+1)
-    u_3 += np.arctan(depth_of_fault/x)
-    u_3 *= slip/pi
+    for i in range(length_of_sum):
+        u_3 += (1 - (np.exp(-t / t_r) * _E(t / t_r, i + 1))) * \
+            _surface_F(x, D, H, i + 1)
+    u_3 += _surface_G(x, D, H)
+    u_3 *= s / pi
     return u_3
+
+
+def surface_velocity_solution(x, t, t_r, D, H, s, length_of_sum=20):
+    v_3 = 0
+    for i in range(length_of_sum):
+        term = (((t / t_r) ** i) / factorial(i)) * _surface_F(x, D, H, i + 1)
+        v_3 += term
+    v_3 *= np.exp(-t / t_r)
+    v_3 *= (s / (pi * t_r))
+    return v_3

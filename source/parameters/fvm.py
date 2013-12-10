@@ -1,13 +1,13 @@
 from matplotlib import pyplot as pyp
-from experiments.weno import WENO
+from rupturotops.weno import WENO
 from core.data import Data
 from core.update_plotter import UpdatePlotter
 from core.error_tracker import ErrorTracker
 from core.experiment import Experiment
-from experiments.controller import Controller
+from rupturotops.controller import Controller
 from parameters.material import wetdiabase
 from core.constants import consts
-from experiments import wave_forms
+from rupturotops import wave_forms
 assert(consts)
 from core.debug import _DEBUG
 assert(_DEBUG)

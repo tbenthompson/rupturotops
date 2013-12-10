@@ -12,7 +12,7 @@ from pyweno.nonuniform import optimal_weights as ow
 from pyweno.nonuniform import jiang_shu_smoothness_coefficients as sc
 import pyximport
 pyximport.install()
-import experiments.ext_weno as ext_weno
+import rupturotops.ext_weno as ext_weno
 
 
 class WENO(object):

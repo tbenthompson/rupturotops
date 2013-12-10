@@ -40,15 +40,31 @@ class CompareSolutions(unittest.TestCase):
     #the arctan solution at time t = 0
     def testCompareSegallViscoelasticSolutionWithSimpleAnalytic(self):
         slip = 1.0
-        depth_of_fault = 15.
+        D = 15.
         H = 15.
         x = np.arange(-100.01, 100.01)
         t_over_t_r = np.arange(0.0, 5.0)
-        u = map(lambda t: constant_slip_maxwell.solution(x, t, depth_of_fault, H, slip), t_over_t_r)
+        u = map(lambda t: constant_slip_maxwell.
+                surface_solution(x, t, 1.0, D, H, slip),
+                t_over_t_r)
 
-        time0analyticsolution = (slip / pi) * np.arctan(depth_of_fault / x)
+        time0analyticsolution = (slip / pi) * np.arctan(D / x)
         self.assertTrue(utilities.mse(u[0], time0analyticsolution) < 0.0001)
         return u, x, H
+
+    def testCompareSurfaceWithDepth(self):
+        """
+        Compares the dimensional lithosphere-asthenosphere surface solution
+        with the depth solution.
+        """
+        s = 1.0
+        D = 15.
+        H = 15.
+        x = np.arange(-100.01, 100.01)
+        t_over_t_r = np.arange(0.0, 5.0)
+        u = map(lambda t: constant_slip_maxwell.
+                surface_solution(x, t, 1.0 , D, H, s),
+                t_over_t_r)
 
     def testCompareVariableSlip(self):
         slip = lambda z: 1

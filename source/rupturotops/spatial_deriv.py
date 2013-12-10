@@ -88,10 +88,10 @@ class SimpleFlux(object):
 # TESTS
 #--------------------------------------------------------------------------
 
-from experiments.wave_forms import square
+from rupturotops.wave_forms import square
 from core.mesh import Mesh
-from experiments.weno import WENO
-from experiments.boundary_conds import PeriodicBC
+from rupturotops.weno import WENO
+from rupturotops.boundary_conds import PeriodicBC
 
 def test_riemann_solver_compute():
     v = np.array([1, 1, 1, 1, 1])
@@ -116,7 +116,6 @@ def test_spatial_deriv():
     m = Mesh(0.1 * np.ones(50))
     sd = SimpleFlux(WENO(m), np.ones(54), m, PeriodicBC())
     derivative = sd.compute(0, square(m.x))
-    _DEBUG()
     assert(np.sum(derivative) <= 0.005)
     for i in range(0, len(derivative)):
         if i == 5:

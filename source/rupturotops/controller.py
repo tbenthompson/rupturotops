@@ -7,11 +7,11 @@ from core.update_plotter import UpdatePlotter
 from core.error_tracker import ErrorTracker
 from core.mesh import Mesh
 assert(_DEBUG)
-import experiments.wave_forms as wave_forms
-import experiments.ssprk4 as ssprk4
-from experiments.weno import WENO, WENO_NEW2
-from experiments.boundary_conds import PeriodicBC
-from experiments.spatial_deriv import SimpleFlux
+import rupturotops.wave_forms as wave_forms
+import rupturotops.ssprk4 as ssprk4
+from rupturotops.weno import WENO, WENO_NEW2
+from rupturotops.boundary_conds import PeriodicBC
+from rupturotops.spatial_deriv import SimpleFlux
 
 
 class Controller(Experiment):

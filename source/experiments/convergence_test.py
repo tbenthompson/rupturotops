@@ -1,8 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as pyp
 from core.data import Data
-import experiments.wave_forms as wave_forms
-from experiments.controller import Controller
+import rupturotops.wave_forms as wave_forms
+from rupturotops.controller import Controller
 from core.debug import _DEBUG
 
 class ConvergenceTest(object):

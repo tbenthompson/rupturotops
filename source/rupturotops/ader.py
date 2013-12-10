@@ -25,8 +25,8 @@ class ADERTime(object):
 ################################################################
 # TESTS
 ################################################################
-from experiments.controller import _test_controller_helper
-import experiments.wave_forms as wave_forms
+from rupturotops.controller import _test_controller_helper
+import rupturotops.wave_forms as wave_forms
 
 def test_ader():
     delta_x = 0.005 * np.ones(200)
