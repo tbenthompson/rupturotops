@@ -57,7 +57,7 @@ def _lower_F(x, y, D, H, n):
     return term1 + term2
 
 def _depth_F(x, y, D, H, n):
-    retval = 0.5 * np.where(y > H, _lower_F(x, y, D, H, n), _upper_F(x, y, D, H, n))
+    retval = np.where(y > H, _upper_F(x, y, D, H, n), _upper_F(x, y, D, H, n))
     return retval
 
 def velocity_solution(x, y, t, t_r, D, H, s, length_of_sum=20):
@@ -66,7 +66,7 @@ def velocity_solution(x, y, t, t_r, D, H, s, length_of_sum=20):
         term = (((t / t_r) ** i) / factorial(i)) * _depth_F(x, y, D, H, i + 1)
         v_3 += term
     v_3 *= np.exp(-t / t_r)
-    v_3 *= (s / (pi * t_r))
+    v_3 *= (s / (2 * pi * t_r))
     return v_3
 
 def test_depth_F():

@@ -12,6 +12,8 @@ def dimensionless_arctan(x, alpha, C):
     return retval
 
 def A_integral(slip_distribution, x, alpha, C):
+    # Computes \int_0^1 \frac{s(z)}{(\alpha x)^2 +
+    # ((\frac{x}{\alpha}) + C * alpha) ^ 2}
     def integrand(z, x_in):
         denom = ((alpha * x_in) ** 2 + ((z / alpha) + C * alpha) ** 2)
         return slip_distribution(z) / denom

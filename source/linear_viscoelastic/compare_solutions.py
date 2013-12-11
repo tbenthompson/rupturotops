@@ -14,8 +14,8 @@ class CompareSolutions(unittest.TestCase):
     # case that the moduli are equal -- the degenerate case
     def testCompareElasticSolutions(self):
         x = np.arange(0.05, 5.0, 0.05)
-        displacement = full_elastic.elastic_half_space(lambda z: 1.0, x)
-        displacement2 = full_elastic.two_layer_elastic(lambda z: 1.0,
+        displacement = full_elastic.surface_elastic_half_space(lambda z: 1.0, x)
+        displacement2 = full_elastic.surface_two_layer_elastic(lambda z: 1.0,
                                                        1.0, 0.0, x)
         self.assertTrue(utilities.mse(displacement, displacement2) < 0.0001)
 
@@ -83,7 +83,7 @@ class CompareSolutions(unittest.TestCase):
         u_t = map(lambda t_in: full_viscoelastic.solution(slip, x, t_in, alpha), t)
 
         #first compare to elastic solutions -- they should match at t=0
-        u_e = full_elastic.elastic_half_space(slip, x)
+        u_e = full_elastic.surface_elastic_half_space(slip, x)
         # print utilities.mse(u_t[0], u_elastic)
         self.assertTrue(utilities.mse(u_t[0], u_e) < 0.0001)
 

@@ -10,13 +10,13 @@ class BoundaryCondExpr(dfn.Expression):
         self.params = params
 
     def eval(self, value, x):
-        v_3 = velocity_solution(x[0],
-                                x[1],
-                                self.t,
-                                self.params.t_r,
-                                self.params.fault_depth,
-                                self.params.elastic_depth,
-                                self.params.fault_slip)
+        v_3 = 0.0#velocity_solution(x[0],
+                                # x[1],
+                                # self.t,
+                                # self.params.t_r,
+                                # self.params.fault_depth,
+                                # self.params.elastic_depth,
+                                # self.params.fault_slip)
         value[0] = v_3
 
 class VelocitySolver(object):

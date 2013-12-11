@@ -47,7 +47,6 @@ class ProjController(Experiment):
             dvdx, dvdy, self.velocity = self.vel_solver.update(t, dt, Szx, Szy)
             self.strs_solver.helmholtz_projection(t, dt, dvdx, dvdy)
             t += dt
-        pyp.show()
 
     def _visualize(self):
         v_3 = velocity_solution(self.strs_solver.X,
@@ -56,17 +55,22 @@ class ProjController(Experiment):
                                 self.params.t_r,
                                 self.params.fault_depth,
                                 self.params.elastic_depth,
-                                self.params.fault_slip)
-        pyp.figure(1)
-        pyp.plot(self.strs_solver.X_, v_3[0, :])
-        pyp.figure(2)
-        pyp.plot(self.strs_solver.X_, self.velocity[0,:])
-        pyp.show()
+                                self.params.fault_slip,
+                                100)
+        # pyp.figure(1)
+        # pyp.plot(self.strs_solver.X_, v_3[0, :])
+        # pyp.figure(2)
+        # pyp.plot(self.strs_solver.X_, self.velocity[0,:])
+        # pyp.show()
         pyp.figure(1)
         im = pyp.imshow(self.velocity)
         pyp.colorbar()
         pyp.figure(2)
         im2 = pyp.imshow(v_3)
         pyp.colorbar()
-        im.set_clim(im2.get_clim())
+        pyp.figure(3)
+        pyp.imshow(self.strs_solver.Szx)
+        pyp.figure(4)
+        pyp.imshow(self.strs_solver.Szy)
+        # im.set_clim(im2.get_clim())
         pyp.show()
