@@ -6,6 +6,7 @@ import constant_slip_maxwell_dimensionless
 import constant_slip_maxwell
 import utilities
 import full_viscoelastic
+from core.debug import _DEBUG
 
 
 class CompareSolutions(unittest.TestCase):
@@ -55,16 +56,23 @@ class CompareSolutions(unittest.TestCase):
     def testCompareSurfaceWithDepth(self):
         """
         Compares the dimensional lithosphere-asthenosphere surface solution
-        with the depth solution.
+        with the depth solution. Only for velocities.
         """
         s = 1.0
         D = 15.
         H = 15.
         x = np.arange(-100.01, 100.01)
         t_over_t_r = np.arange(0.0, 5.0)
-        u = map(lambda t: constant_slip_maxwell.
-                surface_solution(x, t, 1.0 , D, H, s),
-                t_over_t_r)
+        v_s = np.array(map(lambda t: constant_slip_maxwell.
+                surface_velocity_solution(x, t, 1.0 , D, H, s),
+                t_over_t_r))
+
+        y = np.array([0.0])
+        v_d = np.array(map(lambda t: constant_slip_maxwell.
+                velocity_solution(x, y, t, 1.0 , D, H, s),
+                t_over_t_r))
+
+        np.testing.assert_almost_equal(v_s, v_d)
 
     def testCompareVariableSlip(self):
         slip = lambda z: 1

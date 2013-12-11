@@ -1,30 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as pyp
 from core.debug import _DEBUG
+from linear_viscoelastic.simple_elastic import elastic_stress
 
-def view_soln(Szx, Szy):
-    pyp.figure(1)
-    pyp.imshow(np.log(np.abs(Szx)))
-    pyp.colorbar()
-    pyp.figure(2)
-    pyp.imshow(np.log(np.abs(Szy)))
-    pyp.colorbar()
-    pyp.show()
 
-def elastic_stress_soln(x, y, s, D, shear_modulus):
-    """
-    Use the elastic half-space stress solution from Segall (2010)
-    """
-    # TEST THIS!
-    factor = (s * shear_modulus) / (2 * np.pi)
-    main_term = -(y - D) / ((y - D) ** 2 + x ** 2)
-    image_term = (y + D) / ((y + D) ** 2 + x ** 2)
-    Szx = factor * (main_term + image_term)
-
-    main_term = x / (x ** 2 + (y - D) ** 2)
-    image_term = -x / (x ** 2 + (y + D) ** 2)
-    Szy = factor * (main_term + image_term)
-    return Szx, Szy
 
 def eff_stress(Szx, Szy):
     return np.sqrt(Szx ** 2 + Szy ** 2)
@@ -43,13 +22,21 @@ class StressSolver(object):
         self.Y_ = np.linspace(
             self.params.y_min, self.params.y_max, self.params.y_points)
         self.X, self.Y = np.meshgrid(self.X_, self.Y_)
-        self.Szx, self.Szy = elastic_stress_soln(
+        self.Szx, self.Szy = elastic_stress(
             self.X, self.Y, self.params.fault_slip, self.params.fault_depth,
             self.material.shear_modulus)
         self.initialSzx = self.Szx.copy()
         self.initialSzy = self.Szy.copy()
-        # pyp.imshow(np.log(self.stress))
-        # pyp.show()
+
+    @staticmethod
+    def view_soln(Szx, Szy):
+        pyp.figure(1)
+        pyp.imshow(np.log(np.abs(Szx)))
+        pyp.colorbar()
+        pyp.figure(2)
+        pyp.imshow(np.log(np.abs(Szy)))
+        pyp.colorbar()
+        pyp.show()
 
     def inv_eff_visc(self, Szx, Szy, temp):
         retval = np.where(self.Y > self.params.elastic_depth,

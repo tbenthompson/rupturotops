@@ -2,7 +2,22 @@ from matplotlib import pyplot as pyp
 import dolfin as dfn
 import numpy as np
 from core.debug import _DEBUG
+from linear_viscoelastic.constant_slip_maxwell import velocity_solution
 
+class BoundaryCondExpr(dfn.Expression):
+    def __init__(self, params):
+        self.t = 0
+        self.params = params
+
+    def eval(self, value, x):
+        v_3 = velocity_solution(x[0],
+                                x[1],
+                                self.t,
+                                self.params.t_r,
+                                self.params.fault_depth,
+                                self.params.elastic_depth,
+                                self.params.fault_slip)
+        value[0] = v_3
 
 class VelocitySolver(object):
 
@@ -34,26 +49,24 @@ class VelocitySolver(object):
         # Neumann on the free surface (top). But, the natural Neumann boundary condition is 0
         # so it does not show up anywhere in the formulation
         # Western, south boundary condition
+        self.bc_expr = BoundaryCondExpr(self.params)
         self.vel_bc_left = dfn.DirichletBC(
-            self.fnc_space, dfn.Constant(-self.params.plate_rate),
+            self.fnc_space, self.bc_expr,
             lambda x, on_boundary:
             self.vel_left_boundary(x, on_boundary))
 
         # Eastern, right boundary condition
         self.vel_bc_right = dfn.DirichletBC(
-            self.fnc_space, dfn.Constant(self.params.plate_rate),
+            self.fnc_space, self.bc_expr,
             lambda x, on_boundary:
             self.vel_right_boundary(x, on_boundary))
 
         # Mantle boundary conditions
-        # code = "-A + ((2 * A) / (XR - XL)) * (x[0] - XR)"
-        # bottom_bc = dfn.Expression(code, A=self.params.plate_rate,
-        #                            XL = self.params.x_min,
-        #                            XR = self.params.x_max)
         self.vel_bc_bottom = dfn.DirichletBC(
-            self.fnc_space, dfn.Constant(0.0),
+            self.fnc_space, self.bc_expr,
             lambda x, on_boundary:
             self.vel_bottom_boundary(x, on_boundary))
+
         self.velocity = dfn.TrialFunction(self.fnc_space)
         self.velocity_test = dfn.TestFunction(self.fnc_space)
 
@@ -89,6 +102,7 @@ class VelocitySolver(object):
         # z = np.zeros((self.params.x_points * self.params.y_points, 1))
 
         b = dfn.assemble(self.vel_L)
+        self.bc_expr.t = t
         self.vel_bc_left.apply(self.vel_A, b)
         self.vel_bc_right.apply(self.vel_A, b)
         self.vel_bc_bottom.apply(self.vel_A, b)
