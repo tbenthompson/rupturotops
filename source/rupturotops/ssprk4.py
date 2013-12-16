@@ -1,6 +1,6 @@
 
 class SSPRK4(object):
-    cfl_max = 1.507
+    cfl_max = 0.5
 
     def __init__(self):
         pass

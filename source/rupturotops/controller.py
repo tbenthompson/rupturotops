@@ -88,7 +88,7 @@ class Controller(Experiment):
 # TESTS
 #----------------------------------------------------------------------------
 from core.data import Data
-interactive_test = False
+interactive_test = True
 
 
 def test_total_variaton():
@@ -185,11 +185,11 @@ def _test_controller_helper(wave, t_max, delta_x, error_bound, always=False,
     # total variation <= initial_tv + O(h^2)
     init_tv = Controller.total_variation(cont.init)
     result_tv = Controller.total_variation(result)
+
+    if interactive_test is True:
+        pyp.show()
     assert(result_tv < init_tv + error_bound)
 
     # check error
     assert(et.error[-1] < error_bound)
-
-    if interactive_test is True:
-        pyp.show()
     return et, soln_plot
