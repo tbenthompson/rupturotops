@@ -21,7 +21,7 @@ class ConvergenceTest(object):
             delta_x = np.ones(self.domain_length / self.dx[i]) * self.dx[i]
             self.params.delta_x = delta_x
             cont = Controller(self.params)
-            et = ErrorTracker(cont.mesh, cont.analytical, self.params)    
+            et = ErrorTracker(cont.mesh, cont.analytical, self.params)
             #soln_plot = UpdatePlotter(self.params.plotter)
             #soln_plot.add_line(cont.mesh.x, cont.init, '+')
             #soln_plot.add_line(cont.mesh.x, cont.init, '-')
@@ -48,4 +48,4 @@ def test_conv_test():
     #my_params.analytical = lambda x: wave_forms.sin_4(x, 2 * np.pi * 1.0)
     my_params.analytical = lambda x: wave_forms.gaussian(x, 4.0, 2.5)
     ct = ConvergenceTest(my_params, 5.0)
-    ct.run()
+    # ct.run()

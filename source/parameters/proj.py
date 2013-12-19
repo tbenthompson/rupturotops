@@ -10,16 +10,16 @@ params = Data()
 params.material = wetdiabase
 
 #time stepping
-params.delta_t = 25.0 * consts.secs_in_a_year
+params.delta_t = 1.0 * consts.secs_in_a_year
 params.t_max = 100.0 * consts.secs_in_a_year
 
 #grid descriptors
 params.x_min = 10.0
-params.x_max = 5.0e4
+params.x_max = 2.0e4
 params.y_min = 0.0
-params.y_max = 5.0e4
-params.x_points = 30
-params.y_points = 30
+params.y_max = 2.0e4
+params.x_points = 20
+params.y_points = 20
 params.delta_x = (params.x_max - params.x_min) / params.x_points
 params.delta_y = (params.y_max - params.y_min) / params.y_points
 
