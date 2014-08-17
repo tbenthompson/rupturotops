@@ -1,3 +1,0 @@
-rm -r ./modules
-mkdir modules
-python generate_modules.py --dest-dir=modules --suffix=rst  ../source/

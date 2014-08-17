@@ -1,6 +1,0 @@
-\contentsline {section}{\numberline {1}Introduction}{1}{section.1}
-\contentsline {section}{\numberline {2}Problem}{1}{section.2}
-\contentsline {section}{\numberline {3}An Analogy}{2}{section.3}
-\contentsline {section}{\numberline {4}Projection Method for Viscoelasticity}{3}{section.4}
-\contentsline {section}{\numberline {5}Numerical Example}{5}{section.5}
-\contentsline {section}{\numberline {6}Discussion}{9}{section.6}
